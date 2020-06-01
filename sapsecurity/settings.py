@@ -1,0 +1,1 @@
+CONFIG_FILE = "sapsecurity\checks\config.yaml"
