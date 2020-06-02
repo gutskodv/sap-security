@@ -2,8 +2,6 @@ from sapsecurity.checks.security_check import SecurityCheckStatus, SecurityCheck
 
 
 class ElementaryCheck(SecurityCheck):
-    BAD_CONFIG_PARAMS = "BAD_CONFIG_PARAMS"
-
     def __init__(self, title, descr=None, do_log=False):
         super().__init__(title, descr, do_log=do_log)
 
@@ -26,6 +24,7 @@ class ElementaryCheck(SecurityCheck):
         self.comment = self.problem_text
 
     def set_status(self, result):
+        print("result", result)
         comp_result = self.compare_result(result)
         if self.problem:
             self.set_problem_status()

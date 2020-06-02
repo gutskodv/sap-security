@@ -1,8 +1,7 @@
-db_filename: "tempdb.db"
+sqlitedb_filename: "tempdb.db"
 report_name_template: "sapinfo"
 main_title: "SAP Security Analysis Report"
 tcode_to_execute_reports: "sa38"
-comment_when_complied: false
 save_to_file_format: "html"
 
 security_checks:
@@ -11,12 +10,12 @@ security_checks:
     descr: "If hacker get access to weak sap hashes he will be able to get user passwords with brute force password attack"
     do_log: true
     child_checks:
-      - enable: false
+      - enable: true
         class: "CheckProfileParameter"
         title: "Parameter {param_name} should be set to {param_complied_value}"
         descr: "The parameter defines if weak hashes will be created for new users. See note 1458262"
         critical: "High level"
-        do_log: false
+        do_log: true
         param_name: "login/password_downwards_compatibility"
         param_type: 'int'
         param_complied_value: 0
@@ -119,7 +118,7 @@ security_checks:
         table_filter: "tddat_for_hash_table"
         entries_complied_limit: 0
 
-      - enable: true
+      - enable: false
         class: "UsersByPrivileges"
         title: "Minimize number of users with privilege to read tables with hashes (1)"
         descr: "With S_TABU_DIS"
@@ -129,7 +128,7 @@ security_checks:
         rsusr002_filter: "read_hashes_s_tabu_dis"
         entries_complied_limit: 20
 
-      - enable: true
+      - enable: false
         class: "UsersByPrivileges"
         title: "Minimize number of users with privilege to read tables with hashes (2)"
         descr: "With S_TABU_NAM"
@@ -139,7 +138,7 @@ security_checks:
         rsusr002_filter: "read_hashes_s_tabu_nam"
         entries_complied_limit: 20
 
-      - enable: true
+      - enable: false
         class: "RolesByPrivileges"
         title: "Minimize number of roles with privilege to read tables with hashes (1)"
         descr: "With S_TABU_DIS"
@@ -170,160 +169,6 @@ security_checks:
           - 1
           - 2
 
-  - enable: false
-    title: "Set comprehensive passsword policy"
-    descr: "User could not set weak password if strong password policy activated"
-    do_log: false
-    child_checks:
-      - enable: false
-        class: "CheckProfileParameter"
-        title: "Parameter {param_name} should be set more or equal to {more_or_equal_to}"
-        descr: ""
-        critical: "High level"
-        do_log: false
-        param_name: "login/min_password_lng"
-        param_type: 'int'
-        more_or_equal_to: 10
-
-      - enable: false
-        class: "CheckProfileParameter"
-        title: "Parameter {param_name} should be set more or equal to {more_or_equal_to}"
-        descr: ""
-        critical: "Medium level"
-        do_log: false
-        param_name: "login/min_password_letters"
-        param_type: 'int'
-        more_or_equal_to: 2
-
-      - enable: false
-        class: "CheckProfileParameter"
-        title: "Parameter {param_name} should be set more or equal to {more_or_equal_to}"
-        descr: ""
-        critical: "Medium level"
-        do_log: false
-        param_name: "login/min_password_digits"
-        param_type: 'int'
-        more_or_equal_to: 2
-
-      - enable: false
-        class: "CheckProfileParameter"
-        title: "Parameter {param_name} should be set more or equal to {more_or_equal_to}"
-        descr: ""
-        critical: "Medium level"
-        do_log: false
-        param_name: "login/min_password_specials"
-        param_type: 'int'
-        more_or_equal_to: 2
-
-      - enable: false
-        class: "CheckProfileParameter"
-        title: "Parameter {param_name} should be set more or equal to {more_or_equal_to}"
-        descr: ""
-        critical: "Medium level"
-        do_log: false
-        param_name: "login/min_password_lowercase"
-        param_type: 'int'
-        more_or_equal_to: 1
-
-      - enable: false
-        class: "CheckProfileParameter"
-        title: "Parameter {param_name} should be set more or equal to {more_or_equal_to}"
-        descr: ""
-        critical: "Medium level"
-        do_log: false
-        param_name: "login/min_password_uppercase"
-        param_type: 'int'
-        more_or_equal_to: 1
-
-      - enable: false
-        class: "CheckProfileParameter"
-        title: "Parameter {param_name} should be set more or equal to {more_or_equal_to}"
-        descr: ""
-        critical: "Medium level"
-        do_log: false
-        param_name: "login/min_password_diff"
-        param_type: 'int'
-        more_or_equal_to: 4
-
-      - enable: false
-        class: "CheckProfileParameter"
-        title: "Parameter {param_name} should be set more or equal to {more_or_equal_to}"
-        descr: ""
-        critical: "Medium level"
-        do_log: false
-        param_name: "login/password_history_size"
-        param_type: 'int'
-        more_or_equal_to: 20
-
-      - enable: false
-        class: "CheckProfileParameter"
-        title: "Parameter {param_name} should be set to {param_complied_value}"
-        descr: ""
-        critical: "Medium level"
-        do_log: false
-        param_name: "login/password_change_waittime"
-        param_type: 'int'
-        param_complied_value: 1
-
-      - enable: false
-        class: "CheckProfileParameter"
-        title: "Parameter {param_name} should be set less or equal to {less_or_equal_to}"
-        descr: ""
-        critical: "Medium level"
-        do_log: false
-        param_name: "login/password_max_idle_productive"
-        param_type: 'int'
-        less_or_equal_to: 30
-
-      - enable: false
-        class: "CheckProfileParameter"
-        title: "Parameter {param_name} should be set less or equal to {less_or_equal_to}"
-        descr: ""
-        critical: "Medium level"
-        do_log: false
-        param_name: "login/password_max_idle_initial"
-        param_type: 'int'
-        less_or_equal_to: 14
-
-      - enable: false
-        class: "CheckProfileParameter"
-        title: "Parameter {param_name} should be set to {param_complied_value}"
-        descr: ""
-        critical: "Medium level"
-        do_log: false
-        param_name: "login/password_compliance_to_current_policy"
-        param_type: 'int'
-        param_complied_value: 1
-
-      - enable: false
-        class: "CheckProfileParameter"
-        title: "Parameter {param_name} should be set less or equal to {less_or_equal_to}"
-        descr: ""
-        critical: "Medium level"
-        do_log: false
-        param_name: "login/password_expiration_time"
-        param_type: 'int'
-        less_or_equal_to: 120
-
-      - enable: false
-        class: "CheckTableEntries"
-        title: "Set prohibited weak passwords in table {table_name}"
-        descr: ""
-        critical: "High level"
-        do_log: false
-        table_name: "USR40"
-        entries_not_empty: true
-
-      - enable: true
-        class: "CheckTableEntries"
-        title: "There are not dialog active users without assigned security policy in table {table_name}"
-        descr: ""
-        critical: "Medium level"
-        do_log: false
-        table_name: "USR02"
-        table_filter: "user_without_policy"
-        entries_complied_limit: 0
-
 table_filters:
   empty_bcode:
     - field_name: "BCODE"
@@ -345,16 +190,7 @@ table_filters:
     - field_name: "CCLASS"
       exclude_values:
         - "SPWD"
-  user_without_policy:
-    - field_name: "USTYP"
-      equal_values:
-        - "A"
-    - field_name: "UFLAG"
-      equal_values:
-        - "0"
-    - field_name: "SECURITY_POLICY"
-      exclude_values:
-        -
+
 rsusr_filters:
   read_hashes_s_tabu_dis:
     active_users_filter: true

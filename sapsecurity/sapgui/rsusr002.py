@@ -25,9 +25,8 @@ class Rsusr002Filter:
         self.filter_user_type = list()
         self.role_filter = list()
         self.auth_objects = list()
-        pass
 
-    def add_auth_object(self, ao):
+    def __add_auth_object(self, ao):
         self.auth_objects.append(ao)
 
     def init_filter_by_dict(self, indict):
@@ -45,7 +44,7 @@ class Rsusr002Filter:
                 if "auth_object" in privilege and "auth_values" in privilege:
                     new_ao = AuthObject(privilege["auth_object"])
                     new_ao.get_privileges_from_dict(privilege["auth_values"])
-                    self.add_auth_object(new_ao)
+                    self.__add_auth_object(new_ao)
 
 
 class AuthObject:
@@ -65,8 +64,8 @@ class AuthObject:
 
 
 class Rsusr002(Report):
-    def __init__(self, do_log=False):
-        super().__init__(RSUSR002_REPORT, do_log)
+    def __init__(self, sap_session=None, do_log=False):
+        super().__init__(RSUSR002_REPORT, sap_session, do_log)
 
     @staticmethod
     def __set_active_users_only(session):
@@ -122,17 +121,19 @@ class Rsusr002(Report):
         grid_num = SAPLogon.get_grid_rows_number(session, REPORT_GRID)
         return grid_num
 
-    def get_row_number_by_filter(self, session, rsusr002_filter):
-        self.start_report(session)
+    def get_row_number_by_filter(self, sap_session, rsusr002_filter):
+        if not sap_session:
+            sap_session = self.sap_session
+        self.start_report(sap_session)
 
-        SAPLogon.select_element(session, LOGON_TAB)
+        SAPLogon.select_element(sap_session, LOGON_TAB)
         if rsusr002_filter.active_users:
-            self.__set_active_users_only(session)
+            self.__set_active_users_only(sap_session)
 
         if len(rsusr002_filter.filter_user_type):
-            self.__set_filter_by_user_type(session, rsusr002_filter.filter_user_type)
+            self.__set_filter_by_user_type(sap_session, rsusr002_filter.filter_user_type)
 
         if len(rsusr002_filter.auth_objects):
-            self.__set_auth_filter(session, rsusr002_filter)
+            self.__set_auth_filter(sap_session, rsusr002_filter)
 
-        return self.__execute_and_return_entries_number(session)
+        return self.__execute_and_return_entries_number(sap_session)

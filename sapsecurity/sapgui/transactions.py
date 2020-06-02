@@ -4,8 +4,8 @@ from .saplogon import SAPLogon
 class TCode:
     def __init__(self, tcode, sap_session=None, do_log=False):
         self.tcode = tcode
-        self.do_log = do_log
         self.sap_session = sap_session
+        self.do_log = do_log
 
     def call_transaction(self, sap_session=None):
         if not sap_session:
@@ -27,5 +27,5 @@ class TCode:
 
     def exit_transaction(self, sap_session=None):
         if not sap_session:
-            sap_session = self.sap_sesion
+            sap_session = self.sap_session
         SAPLogon.call_transaction(sap_session, "")

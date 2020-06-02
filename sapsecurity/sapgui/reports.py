@@ -14,15 +14,19 @@ class Report:
     tcode_to_start_report = None
 
     def __init__(self, report_name, sap_session=None, do_log=False):
+        self.save_to_file = True
         self.report_name = report_name
-        self.load_tcode_to_start_report()
         self.sap_session = sap_session
         self.do_log = do_log
+        Report.load_tcode_to_start_report()
         self.problem = None
         self.problem_text = ""
+        self.folder_to_save = ""
+        self.save_to_file = False
 
-    def load_tcode_to_start_report(self):
-        if self.tcode_to_start_report:
+    @staticmethod
+    def load_tcode_to_start_report():
+        if Report.tcode_to_start_report:
             return
 
         with open(CONFIG_FILE) as file:
@@ -30,12 +34,12 @@ class Report:
 
             if "tcode_to_execute_reports" in yaml_dict:
                 if yaml_dict['tcode_to_execute_reports'].upper() == SA38_TCODE:
-                    self.tcode_to_start_report = SA38_TCODE
+                    Report.tcode_to_start_report = SA38_TCODE
                 elif yaml_dict['tcode_to_execute_reports'].upper() == SE38_TCODE:
-                    self.tcode_to_start_report = SE38_TCODE
+                    Report.tcode_to_start_report = SE38_TCODE
 
-        if not self.tcode_to_start_report:
-            self.tcode_to_start_report = DEFAULT_TCODE
+        if not Report.tcode_to_start_report:
+            Report.tcode_to_start_report = DEFAULT_TCODE
 
     def __set_report_and_execute(self, sap_session):
         SAPLogon.set_text(sap_session, PROGRAM_FIELD, self.report_name)
@@ -57,16 +61,17 @@ class Report:
         if not sap_session:
             sap_session = self.sap_session
 
-        transaction = TCode(self.tcode_to_start_report, sap_session)
+        transaction = TCode(Report.tcode_to_start_report, sap_session)
         transaction.call_transaction()
 
         self.__set_report_and_execute(sap_session)
 
     def need_to_save(self, folder_to_save):
-        self.save_to_file = True
         self.folder_to_save = folder_to_save
+        self.save_to_file = True
 
-    def save(self, sap_session):
+    def save(self, sap_session=None):
+        if not sap_session:
+            sap_session = self.sap_session
         dialog = SaveToFile(self.folder_to_save, sap_session)
         dialog.save_to_file()
-

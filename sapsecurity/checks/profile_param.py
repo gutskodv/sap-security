@@ -7,7 +7,7 @@ class CheckProfileParameter(ElementaryCheck):
         super().__init__(title, descr, do_log)
         self.comment_text = "Parameter is set to {result} (but required {req_text})"
 
-    def __compare_result(self, result):
+    def compare_result(self, result):
         try:
             if hasattr(self, "param_type") and self.param_type == 'int':
                 result = int(result)

@@ -9,38 +9,43 @@ from sapsecurity.checks.users_by_privileges import UsersByPrivileges, RolesByPri
 from sapsecurity.checks.profile_param import CheckProfileParameter
 from sapsecurity.checks.table_entries import CheckTableEntries
 
-class MainProcess:
+
+class SAPSecurityAnalysis:
     def __init__(self, title, descr=None, do_log=True):
+        self.date_scan = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
         self.composite_checks = list()
         self.sap_session = None
+        self.session_info = None
         self.title = title
         self.descr = descr
         self.do_log = do_log
         self.report_folder = None
 
-    def create_report_folder(self):
+    def __create_report_folder(self):
         if not self.report_folder:
-            localdir = os.path.abspath(os.getcwd())
+            local_dir = os.path.abspath(os.getcwd())
             sid = self.session_info["sid"]
-            localdir = os.path.join(localdir, "reports")
-            if not os.path.exists(localdir): os.makedirs(localdir)
-            localdir = os.path.join(localdir, sid)
-            if not os.path.exists(localdir): os.makedirs(localdir)
+            local_dir = os.path.join(local_dir, "reports")
+            if not os.path.exists(local_dir):
+                os.makedirs(local_dir)
+            local_dir = os.path.join(local_dir, sid)
+            if not os.path.exists(local_dir):
+                os.makedirs(local_dir)
             date_today = datetime.datetime.now().strftime("%Y%m%d")
 
-            new_dir = os.path.join(localdir, date_today)
+            new_dir = os.path.join(local_dir, date_today)
             if not os.path.exists(new_dir):
                 os.makedirs(new_dir)
                 self.report_folder = new_dir
             else:
                 for i in range(0, 100):
-                    new_dir = os.path.join(localdir, date_today + "_" + str(i).zfill(2))
+                    new_dir = os.path.join(local_dir, date_today + "_" + str(i).zfill(2))
                     if not os.path.exists(new_dir):
                         os.makedirs(new_dir)
                         self.report_folder = new_dir
                         break
 
-    def add_composite_check(self, composite_check):
+    def __add_composite_check(self, composite_check):
         self.composite_checks.append(composite_check)
 
     def sap_login(self):
@@ -51,13 +56,19 @@ class MainProcess:
         else:
             self.sap_session = sap_session
             self.session_info = session_info
-            self.datescan = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
-            self.create_report_folder()
+            self.__create_report_folder()
 
-    def add_checks(self):
-        self.add_security_checks()
+    def start_analysis(self):
+        self.sap_login()
+        if self.sap_session:
+            self.__add_checks()
+            self.__execute_all()
+            self.__create_report()
 
-    def execute_all(self):
+    def __add_checks(self):
+        self.__add_security_checks()
+
+    def __execute_all(self):
         for check in self.composite_checks:
             if check.enable:
                 check.execute(self.sap_session)
@@ -66,11 +77,11 @@ class MainProcess:
                         title=check.title.format(**check.__dict__),
                         status=check.status))
 
-    def create_report(self):
+    def __create_report(self):
         report = SecurityReport(self, self.report_folder)
         report.generate_report()
 
-    def add_security_checks(self):
+    def __add_security_checks(self):
         with open(CONFIG_FILE) as file:
             yaml_dict = yaml.full_load(file)
 
@@ -110,8 +121,8 @@ class MainProcess:
                             continue
                         if class_name not in globals():
                             if self.do_log:
-                                print("Elementary check with title '{0}' aborted. Class {1} not found".format(title,
-                                                                                                              class_name))
+                                print("Elementary check with title '{0}' aborted. Class {1} not found".format(
+                                    title, class_name))
                             continue
                         class_id = globals()[class_name]
                         new_elementary_check = class_id(title, descr, do_log)

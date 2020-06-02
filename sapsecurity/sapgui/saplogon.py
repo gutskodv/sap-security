@@ -1,7 +1,5 @@
 import win32com.client
 import pythoncom
-from sapsecurity.sapgui.exceptions import SAPGuiNotRunning, SAPGuiNotFoundActiveConnections, SAPGuiScriptingDisabled
-from sapsecurity.sapgui.exceptions import SAPGuiElementNotFound, SAPGuiNullSession, SAPGuiWrongElementType
 
 SAP_GUI_APPLICATION = "SAPGUI"
 SAP_LOGON = "SAP Logon"
@@ -43,13 +41,10 @@ GUI_VKEYS = {
 }
 TRY_TEXT_TYPES = ['ctxt', 'txt']
 
-class SAPGuiAddress:
-    pass
-
 
 class SAPLogon:
     @staticmethod
-    def get_sap_session(multi_connections=False, session_num=0):
+    def get_sap_session():
         try:
             sap_gui = win32com.client.GetObject(SAP_GUI_APPLICATION)
             if not isinstance(sap_gui, win32com.client.CDispatch):
@@ -72,7 +67,7 @@ class SAPLogon:
                 sap_connection = sap_application.Children(0)
                 if not isinstance(sap_connection, win32com.client.CDispatch):
                     sap_connection = None
-        except:
+        except pythoncom.com_error:
             # com_error 2147352567
             sap_application = None
             sap_connection = None
@@ -116,7 +111,7 @@ class SAPLogon:
                 return sap_session, outdict
             else:
                 msg = "An error occurred while executing the script. Details:\n"
-                msg += "Not authorized session to {0}".format(outdict["sid"])
+                msg += "Not authorized session to system {0}".format(outdict["sid"])
                 raise RuntimeError(msg)
 
     @staticmethod
@@ -135,12 +130,12 @@ class SAPLogon:
         text_element = SAPLogon.__get_element(sap_session, text_element_id)
 
         if text_element.type in GUI_TYPES_WITH_TEXT_PROPERTY:
-                return text_element.text
+            return text_element.text
         else:
             msg = "An error occurred while executing the script. Details:\n"
-            msg += "Element '{0}' has no 'text' property(wrong element type '{1}')".format(text_element_id, text_element.type)
+            msg += "Element '{0}' has no 'text' property(wrong element type '{1}')".format(text_element_id,
+                                                                                           text_element.type)
             raise TypeError(msg)
-
 
     @staticmethod
     def press_button(sap_session, button_element_id):
@@ -150,7 +145,8 @@ class SAPLogon:
             button_element.press()
         else:
             msg = "An error occurred while executing the script. Details:\n"
-            msg += "Element '{0}' has no press() method (wrong element type '{1}')".format(button_element_id, button_element.type)
+            msg += "Element '{0}' has no press() method (wrong element type '{1}')".format(button_element_id,
+                                                                                           button_element.type)
             raise TypeError(msg)
 
     @staticmethod
@@ -178,7 +174,8 @@ class SAPLogon:
             select_element.select()
         else:
             msg = "An error occurred while executing the script. Details:\n"
-            msg += "Element '{0}' has no select() method (wrong element type '{1}')".format(element_id, select_element.type)
+            msg += "Element '{0}' has no select() method (wrong element type '{1}')".format(element_id,
+                                                                                            select_element.type)
             raise TypeError(msg)
 
     @staticmethod
@@ -213,7 +210,6 @@ class SAPLogon:
 
         if statusbar.text:
             return statusbar.MessageType, statusbar.MessageNumber, statusbar.text
-
 
     @staticmethod
     def call_transaction(sap_session, transaction, window_id=GUI_MAIN_WINDOW):
@@ -268,8 +264,8 @@ class SAPLogon:
             return scroll_element.verticalScrollbar.position
         else:
             msg = "An error occurred while executing the script. Details:\n"
-            msg += "Element '{0}' has no verticalScrollbar object (wrong element type '{1}')".format(area_id,
-                                                                                              scroll_element.type)
+            msg += "Element '{0}' has no verticalScrollbar object (wrong element type '{1}')".format(
+                area_id, scroll_element.type)
             raise TypeError(msg)
 
     @staticmethod
@@ -279,8 +275,8 @@ class SAPLogon:
             return scroll_element.verticalScrollbar.Maximum
         else:
             msg = "An error occurred while executing the script. Details:\n"
-            msg += "Element '{0}' has no verticalScrollbar object (wrong element type '{1}')".format(area_id,
-                                                                                              scroll_element.type)
+            msg += "Element '{0}' has no verticalScrollbar object (wrong element type '{1}')".format(
+                area_id, scroll_element.type)
             raise TypeError(msg)
 
     @staticmethod
@@ -294,9 +290,10 @@ class SAPLogon:
             scroll_element.verticalScrollbar.position = position
         else:
             msg = "An error occurred while executing the script. Details:\n"
-            msg += "Element '{0}' has no verticalScrollbar object (wrong element type '{1}')".format(area_id,
-                                                                                              scroll_element.type)
+            msg += "Element '{0}' has no verticalScrollbar object (wrong element type '{1}')".format(
+                area_id, scroll_element.type)
             raise TypeError(msg)
+
     @staticmethod
     def __find_menu_element(menu, menu_names):
         if menu.text in menu_names:
@@ -334,5 +331,5 @@ class SAPLogon:
             try:
                 element = SAPLogon.__get_element(root_area, id_template.format(index))
                 yield index, element
-            except AttributeError as err:
+            except AttributeError:
                 break

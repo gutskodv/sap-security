@@ -17,11 +17,11 @@ OK_BUTTON = "wnd[1]/tbar[0]/btn[8]"
 
 
 class Rsusr070(Report):
-    def __init__(self, do_log=False):
-        super().__init__(RSUSR070_REPORT, do_log)
+    def __init__(self, sap_session=None, do_log=False):
+        super().__init__(RSUSR070_REPORT, sap_session, do_log)
 
     @staticmethod
-    def set_auth_filter(session, rsusr002_filter):
+    def __set_auth_filter(session, rsusr002_filter):
         for i, auth in enumerate(rsusr002_filter.auth_objects):
             if i >= MAX_AUTH_OBJECTS:
                 break
@@ -49,7 +49,7 @@ class Rsusr070(Report):
                                                                              num=i + 1, num1=k, num2=j + 1),
                                                  value)
 
-    def execute_and_return_enties_number(self, session):
+    def __execute_and_return_enties_number(self, session):
         SAPLogon.press_keyboard_keys(session, "F8")
         msg = SAPLogon.get_status_message(session)
         if msg and msg[1] == "265":
@@ -62,7 +62,7 @@ class Rsusr070(Report):
         return grid_num
 
     @staticmethod
-    def set_roles_filter(session, roles_filter):
+    def __set_roles_filter(session, roles_filter):
         SAPLogon.press_button(session, ROLES_FILTER_BUTTON)
         for i, item in enumerate(roles_filter):
             SAPLogon.try_to_set_text(session,
@@ -70,15 +70,17 @@ class Rsusr070(Report):
                                      item)
         SAPLogon.press_button(session, OK_BUTTON)
 
-    def get_row_number_by_filter(self, session, rsusr070_filter):
-        self.start_report(session)
+    def get_row_number_by_filter(self, sap_session, rsusr070_filter):
+        if not sap_session:
+            sap_session = self.sap_session
+        self.start_report(sap_session)
         if self.problem:
             return
 
         if len(rsusr070_filter.role_filter) > 0:
-            self.set_roles_filter(session, rsusr070_filter.role_filter)
+            self.__set_roles_filter(sap_session, rsusr070_filter.role_filter)
 
         if len(rsusr070_filter.auth_objects):
-            self.set_auth_filter(session, rsusr070_filter)
+            self.__set_auth_filter(sap_session, rsusr070_filter)
 
-        return self.execute_and_return_enties_number(session)
+        return self.__execute_and_return_enties_number(sap_session)

@@ -23,7 +23,7 @@ class Rspfpar(Report):
         self.__set_param_name_and_execute(sap_session)
         result = self.__get_param_from_grid(sap_session)
         if self.do_log:
-            print("Parameter {0} is set to ".format(self.param_name, result))
+            print("Parameter {0} is set to {1}".format(self.param_name, result))
         return result
 
     def __get_param_from_grid(self, sap_session):

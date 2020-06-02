@@ -1,6 +1,7 @@
 import yaml
 from sapsecurity.checks.table_check import TableCheck
 from sapsecurity.sapgui.se16 import TCodeSE16, FieldFilters
+from sapsecurity.settings import CONFIG_FILE
 
 
 class CheckTableEntries(TableCheck):
@@ -8,7 +9,7 @@ class CheckTableEntries(TableCheck):
         super().__init__(title, descr,  do_log)
 
     def get_table_filter(self):
-        with open(r'SecurityChecks\config.yaml') as file:
+        with open(CONFIG_FILE) as file:
             yaml_dict = yaml.full_load(file)
 
             if "table_filters" not in yaml_dict:

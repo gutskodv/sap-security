@@ -14,8 +14,8 @@ class SecurityReport:
 
     def get_scan_descr(self):
         scan_descr = list()
-        if hasattr(self.main_process, 'datescan'):
-            scan_descr.append("Date: {datescan}".format(datescan=self.main_process.datescan))
+        if hasattr(self.main_process, 'date_scan'):
+            scan_descr.append("Date: {datescan}".format(datescan=self.main_process.date_scan))
         if hasattr(self.main_process, 'sessioninfo'):
             if hasattr(self.main_process.sessioninfo, 'user'):
                 scan_descr.append("User: {user}".format(user=self.main_process.sessioninfo.user))

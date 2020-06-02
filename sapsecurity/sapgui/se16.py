@@ -15,7 +15,7 @@ INCLUDE_VALUES_TEMPLATE = "wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:S
                           "/{type}RSCSEL_255-SLOW_I[1,{row}]"
 INCLUDE_VALUES_BUTTON = "wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE" \
                         "/btnRSCSEL_255-SOP_I[0,{0}] "
-EXCLUDE_VALUES_TEMPLATE ="wnd[1]/usr/tabsTAB_STRIP/tabpNOSV/ssubSCREEN_HEADER:SAPLALDB:3030/tblSAPLALDBSINGLE_E" \
+EXCLUDE_VALUES_TEMPLATE = "wnd[1]/usr/tabsTAB_STRIP/tabpNOSV/ssubSCREEN_HEADER:SAPLALDB:3030/tblSAPLALDBSINGLE_E" \
                          "/{type}RSCSEL_255-SLOW_E[1,{row}]"
 EXCLUDE_VALUES_BUTTON = "wnd[1]/usr/tabsTAB_STRIP/tabpNOSV/ssubSCREEN_HEADER:SAPLALDB:3030/tblSAPLALDBSINGLE_E" \
                         "/btnRSCSEL_255-SOP_E[0,{0}]"
@@ -75,7 +75,8 @@ class FieldFilters:
                                                                  startpos):
                 max_i = i
                 if element.text in column_list:
-                    session.findById("wnd[1]/usr/chk[2,{0}]".format(i)).selected = True
+                    SAPLogon.select_element(session, "wnd[1]/usr/chk[2,{0}]".format(i))
+                    # session.findById("wnd[1]/usr/chk[2,{0}]".format(i)).selected = True
             if pos_scroll < max_scroll:
                 new_pos_scroll = min(pos_scroll + max_i, max_scroll)
                 startpos = max_i - (new_pos_scroll - pos_scroll) + 1
@@ -116,9 +117,9 @@ class FieldFilter:
 
     def __str__(self):
         out_list = list()
-        out_list.append("Field: %s" % (self.field_name))
+        out_list.append("Field: %s" % (self.field_name,))
         if hasattr(self, "exclude_single_values") and self.exclude_single_values:
-            out_list.append("Exculde: %s" % (", ".join(self.exclude_single_values)))
+            out_list.append("Exclude: %s" % (", ".join(self.exclude_single_values)))
         if hasattr(self, "equal_single_values") and self.equal_single_values:
             out_list.append("Equal: %s" % (", ".join(self.equal_single_values)))
 
