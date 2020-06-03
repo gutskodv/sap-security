@@ -53,6 +53,10 @@ class SaveToFile:
         if os.path.exists(os.path.join(path, folder + gif_extension)):
             os.remove(os.path.join(path, folder + gif_extension))
 
+        gif_extension = "s_actgro.gif"
+        if os.path.exists(os.path.join(path, folder + gif_extension)):
+            os.remove(os.path.join(path, folder + gif_extension))
+
     def save_to_file(self, sap_session=None):
         if not sap_session:
             sap_session = self.sap_session

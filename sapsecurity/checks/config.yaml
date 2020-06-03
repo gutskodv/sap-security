@@ -1,29 +1,34 @@
 sqlitedb_filename: "tempdb.db"
 report_name_template: "sapinfo"
 main_title: "SAP Security Analysis Report"
-tcode_to_execute_reports: "sa38"
+tcode_to_execute_reports: "se38"
 save_to_file_format: "html"
 
 security_checks:
   - enable: true
-    title: "Weak user password hashes (BCODE, PASSCODE) in SAP tables"
-    descr: "If hacker get access to weak sap hashes he will be able to get user passwords with brute force password attack"
+    title: "Weak password hashes (BCODE, PASSCODE) in SAP tables"
+    descr: >
+      SAP passwords are stored in the database in some tables. They are not stored in clear text,
+      but in a hashed format. Hash can be generated via different algorithms. If hacker get access to tables with weak
+      password hashes he will be able to easily get real value of user passwords with brute force password attack.
     do_log: true
     child_checks:
       - enable: true
         class: "CheckProfileParameter"
         title: "Parameter {param_name} should be set to {param_complied_value}"
-        descr: "The parameter defines if weak hashes will be created for new users. See note 1458262"
+        descr: >
+          The parameter login/password_downwards_compatibility defines if weak password hashes will be created for new users.
+          See SAP Note 1458262.
         critical: "High level"
         do_log: true
         param_name: "login/password_downwards_compatibility"
         param_type: 'int'
         param_complied_value: 0
 
-      - enable: false
+      - enable: true
         class: "CheckTableEntries"
-        title: "No weak hashes in {field_name} field in table {table_name}"
-        descr: "Table {table_name} contains hashes of active user passwords. Field {field_name} stores the worst sap hash"
+        title: "No weak password hashes in {field_name} field in the {table_name} table"
+        descr: "The {table_name} table  contains hashes of active user passwords. The {field_name} field stores the worst sap password hash."
         critical: "High level"
         do_log: false
         table_name: "USR02"
@@ -31,10 +36,10 @@ security_checks:
         table_filter: "empty_bcode"
         entries_complied_limit: 0
 
-      - enable: false
+      - enable: true
         class: "CheckTableEntries"
-        title: "No weak hashes in {field_name} field in table {table_name}"
-        descr: "Table {table_name} contains hashes of active user passwords. Field {field_name} stores weak sap hash"
+        title: "No weak hashes in {field_name} field in the {table_name} table"
+        descr: "The {table_name} table contains hashes of active user passwords. The {field_name} field stores weak F sap password hash."
         critical: "High level"
         do_log: false
         table_name: "USR02"
@@ -42,10 +47,10 @@ security_checks:
         table_filter: "empty_passcode"
         entries_complied_limit: 0
 
-      - enable: false
+      - enable: true
         class: "CheckTableEntries"
-        title: "No weak hashes in {field_name} field in table {table_name}"
-        descr: "Table {table_name} contains hashes of old user passwords. Field {field_name} stores the worst sap hash"
+        title: "No weak hashes in {field_name} field in the {table_name} table"
+        descr: "The {table_name} table contains hashes of old user passwords. The {field_name} field stores the worst sap password hash."
         critical: "Medium level"
         do_log: false
         table_name: "USH02"
@@ -53,10 +58,10 @@ security_checks:
         table_filter: "empty_bcode"
         entries_complied_limit: 0
 
-      - enable: false
+      - enable: true
         class: "CheckTableEntries"
-        title: "No weak hashes in {field_name} field in table {table_name}"
-        descr: "Table {table_name} contains hashes of old user passwords. Field {field_name} stores weak sap hash"
+        title: "No weak hashes in {field_name} field in the {table_name} table"
+        descr: "The {table_name} table contains hashes of old user passwords. The {field_name} field stores weak F sap password hash."
         critical: "Low level"
         do_log: false
         table_name: "USH02"
@@ -64,10 +69,10 @@ security_checks:
         table_filter: "empty_passcode"
         entries_complied_limit: 0
 
-      - enable: false
+      - enable: true
         class: "CheckTableEntries"
-        title: "No weak hashes in {field_name} field in table {table_name}"
-        descr: "Table {table_name} contains hashes of old user passwords. Field {field_name} stores the worst sap hash"
+        title: "No weak hashes in {field_name} field in the {table_name} table"
+        descr: "The {table_name} table contains hashes of old user passwords. The {field_name} field stores the worst sap password hash."
         critical: "Medium level"
         do_log: false
         table_name: "USRPWDHISTORY"
@@ -75,10 +80,10 @@ security_checks:
         table_filter: "empty_bcode"
         entries_complied_limit: 0
 
-      - enable: false
+      - enable: true
         class: "CheckTableEntries"
-        title: "No weak hashes in {field_name} field in table {table_name}"
-        descr: "Table {table_name} contains hashes of old user passwords. Field {field_name} stores weak sap hash"
+        title: "No weak hashes in {field_name} field in the {table_name} table"
+        descr: "The {table_name}table contains hashes of old user passwords. The {field_name} field stores weak F sap password hash."
         critical: "Low level"
         do_log: false
         table_name: "USRPWDHISTORY"
@@ -86,10 +91,10 @@ security_checks:
         table_filter: "empty_passcode"
         entries_complied_limit: 0
 
-      - enable: false
+      - enable: true
         class: "CheckTableEntries"
-        title: "No weak hashes in {field_name} field in table {table_name}"
-        descr: "Table {table_name} contains hashes of old user passwords. Field {field_name} stores the worst sap hash"
+        title: "No weak hashes in {field_name} field in {table_name} table "
+        descr: "The {table_name} table contains hashes of old user passwords. The {field_name} field stores the worst sap password hash."
         critical: "Medium level"
         do_log: false
         table_name: "USH02_ARC_TMP"
@@ -97,10 +102,10 @@ security_checks:
         table_filter: "empty_bcode"
         entries_complied_limit: 0
 
-      - enable: false
+      - enable: true
         class: "CheckTableEntries"
-        title: "No weak hashes in {field_name} field in table {table_name}"
-        descr: "Table {table_name} contains hashes of old user passwords. Field {field_name} stores weak sap hash"
+        title: "No weak hashes in {field_name} field in {table_name} table"
+        descr: "The {table_name} table contains hashes of old user passwords. The {field_name} field stores weak F sap password hash."
         critical: "Low level"
         do_log: false
         table_name: "USH02_ARC_TMP"
@@ -108,59 +113,59 @@ security_checks:
         table_filter: "empty_passcode"
         entries_complied_limit: 0
 
-      - enable: false
+      - enable: true
         class: "CheckTableEntries"
-        title: "Set SAP tables with hashes to SPWD class (according to note 1484692)"
-        descr: ""
+        title: "The tables with sap password hashes assigned to SPWD class (authority group)"
+        descr: "The tables USR02, USH02, USRPWDHISTORY, USR02_ARC_TMP, VUSER001, VUSR02_PWD contains password hashes. These critical tables should be add to special SPWD authority group for tables (according to SAP Note 1484692)."
         critical: "High level"
         do_log: false
         table_name: "TDDAT"
         table_filter: "tddat_for_hash_table"
         entries_complied_limit: 0
 
-      - enable: false
+      - enable: true
         class: "UsersByPrivileges"
-        title: "Minimize number of users with privilege to read tables with hashes (1)"
-        descr: "With S_TABU_DIS"
+        title: "Limit as possible number of users who can read tables with sap password hashes (1)"
+        descr: "The check inspects SAP system to find users containing S_TABU_DIS authority object to read tables with password hashes."
         critical: "High level"
         do_log: true
         save_to_file: true
         rsusr002_filter: "read_hashes_s_tabu_dis"
         entries_complied_limit: 20
 
-      - enable: false
+      - enable: true
         class: "UsersByPrivileges"
-        title: "Minimize number of users with privilege to read tables with hashes (2)"
-        descr: "With S_TABU_NAM"
+        title: "Limit as possible number of users who can read tables with sap password hashes (1)"
+        descr: "The check inspects SAP system to find users containing S_TABU_NAM authority object to read tables with password hashes."
         critical: "High level"
         do_log: false
         save_to_file: true
         rsusr002_filter: "read_hashes_s_tabu_nam"
         entries_complied_limit: 20
 
-      - enable: false
+      - enable: true
         class: "RolesByPrivileges"
-        title: "Minimize number of roles with privilege to read tables with hashes (1)"
-        descr: "With S_TABU_DIS"
+        title: "Limit as possible number of roles which provide access to read tables with sap password hashes (1)"
+        descr: "The check inspects SAP system to find roles containing S_TABU_DIS authority object to read tables with password hashes."
         critical: "Medium level"
         do_log: false
         save_to_file: true
         rsusr070_filter: "read_hashes_s_tabu_dis"
         entries_complied_limit: 5
 
-      - enable: false
+      - enable: true
         class: "RolesByPrivileges"
-        title: "Minimize number of roles with privilege to read tables with hashes (2)"
-        descr: "With S_TABU_NAM"
+        title: "Limit as possible number of roles which provide access to read tables with sap password hashes (2)"
+        descr: "The check inspects SAP system to find roles containing S_TABU_NAM authority object to read tables with password hashes."
         critical: "Medium level"
         do_log: false
         rsusr070_filter: "read_hashes_s_tabu_nam"
         entries_complied_limit: 5
 
-      - enable: false
+      - enable: true
         class: "CheckProfileParameter"
         title: "Parameter {param_name} should be set to {req_text}"
-        descr: "The parameter defines the characters of which a password can consist. Value 0 - most restrictive insecure value"
+        descr: "The parameter defines the characters of which a password can consist. Value 0 - most restrictive insecure value. Set 1 or 2."
         critical: "Medium level"
         do_log: false
         param_name: "login/password_charset"
@@ -213,9 +218,8 @@ rsusr_filters:
         auth_values:
           - auth_field: "TCD"
             values:
-              - "SE16"
-              - "SE16N"
-              - "SM30"
+              - "SE16*"
+              - "SE11"
 
   read_hashes_s_tabu_nam:
     active_users_filter: true
@@ -243,4 +247,3 @@ rsusr_filters:
             values:
               - "SE16"
               - "SE16N"
-              - "SM30"

@@ -2,7 +2,7 @@ from sapsecurity.checks.manager import SAPSecurityAnalysis
 
 
 def main():
-    process = SAPSecurityAnalysis('Security checks processing', do_log=True)
+    process = SAPSecurityAnalysis(do_log=True)
     process.start_analysis()
 
 

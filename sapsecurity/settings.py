@@ -1,1 +1,1 @@
-CONFIG_FILE = "sapsecurity\checks\config.yaml"
+CONFIG_FILE = "checks\config.yaml"

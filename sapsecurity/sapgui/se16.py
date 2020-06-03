@@ -75,8 +75,7 @@ class FieldFilters:
                                                                  startpos):
                 max_i = i
                 if element.text in column_list:
-                    SAPLogon.select_element(session, "wnd[1]/usr/chk[2,{0}]".format(i))
-                    # session.findById("wnd[1]/usr/chk[2,{0}]".format(i)).selected = True
+                    SAPLogon.set_checkbox(session, "wnd[1]/usr/chk[2,{0}]".format(i))
             if pos_scroll < max_scroll:
                 new_pos_scroll = min(pos_scroll + max_i, max_scroll)
                 startpos = max_i - (new_pos_scroll - pos_scroll) + 1

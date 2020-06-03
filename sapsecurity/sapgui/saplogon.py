@@ -1,5 +1,7 @@
-import win32com.client
 import pythoncom
+pythoncom.CoInitialize()
+import win32com.client
+
 
 SAP_GUI_APPLICATION = "SAPGUI"
 SAP_LOGON = "SAP Logon"
@@ -15,6 +17,8 @@ GUI_TYPES_WITH_PRESS_METHOD = ("GuiButton",
 GUI_TYPES_WITH_SELECT_METHOD = ("GuiMenu",
                                 "GuiTab",
                                 "GuiRadioButton")
+GUI_TYPES_WITH_SELECTED_PROPERTY = (
+    "GuiCheckBox")
 GUI_TYPES_WITH_SENDVKEY_METHOD = ("GuiMainWindow",
                                   "GuiModalWindow"
                                   )
@@ -45,11 +49,18 @@ TRY_TEXT_TYPES = ['ctxt', 'txt']
 class SAPLogon:
     @staticmethod
     def get_sap_session():
+        pythoncom.CoInitialize()
         try:
+            print(0)
             sap_gui = win32com.client.GetObject(SAP_GUI_APPLICATION)
+            print(1)
             if not isinstance(sap_gui, win32com.client.CDispatch):
                 sap_gui = None
-        except pythoncom.com_error:
+        except pythoncom.com_error as error:
+            print(str(error))
+            print(error)
+            print(vars(error))
+            print(error.args)
             # com_error 2147221014
             sap_gui = None
         finally:
@@ -165,6 +176,18 @@ class SAPLogon:
             raise AttributeError(msg)
         else:
             return element
+
+    @staticmethod
+    def set_checkbox(sap_session, element_id):
+        selected_element = SAPLogon.__get_element(sap_session, element_id)
+
+        if selected_element.type in GUI_TYPES_WITH_SELECTED_PROPERTY:
+            selected_element.selected = True
+        else:
+            msg = "An error occurred while executing the script. Details:\n"
+            msg += "Element '{0}' has no select() method (wrong element type '{1}')".format(element_id,
+                                                                                            selected_element.type)
+            raise TypeError(msg)
 
     @staticmethod
     def select_element(sap_session, element_id):

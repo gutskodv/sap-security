@@ -11,13 +11,13 @@ from sapsecurity.checks.table_entries import CheckTableEntries
 
 
 class SAPSecurityAnalysis:
-    def __init__(self, title, descr=None, do_log=True):
+    def __init__(self, do_log=True):
         self.date_scan = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
         self.composite_checks = list()
         self.sap_session = None
         self.session_info = None
-        self.title = title
-        self.descr = descr
+        self.title = ""
+        self.descr = ""
         self.do_log = do_log
         self.report_folder = None
 
@@ -82,6 +82,7 @@ class SAPSecurityAnalysis:
         report.generate_report()
 
     def __add_security_checks(self):
+
         with open(CONFIG_FILE) as file:
             yaml_dict = yaml.full_load(file)
 

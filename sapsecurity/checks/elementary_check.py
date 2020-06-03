@@ -24,7 +24,6 @@ class ElementaryCheck(SecurityCheck):
         self.comment = self.problem_text
 
     def set_status(self, result):
-        print("result", result)
         comp_result = self.compare_result(result)
         if self.problem:
             self.set_problem_status()
