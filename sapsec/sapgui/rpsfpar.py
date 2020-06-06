@@ -7,9 +7,9 @@ REPORT_GRID = 'wnd[0]/usr/cntlGRID1/shellcont/shell'
 
 
 class Rspfpar(Report):
-    def __init__(self, param_name, sap_sessoin=None, do_log=False):
+    def __init__(self, param_name, config_file, sap_session=None, do_log=False):
         self.param_name = param_name
-        super().__init__(RSPFPAR_REPORT, sap_sessoin, do_log)
+        super().__init__(RSPFPAR_REPORT, config_file, sap_session, do_log)
 
     def __set_param_name_and_execute(self, sap_session):
         SAPLogon.set_text(sap_session, PARAM_NAME_FIELD, self.param_name)
@@ -22,16 +22,13 @@ class Rspfpar(Report):
         self.start_report(sap_session)
         self.__set_param_name_and_execute(sap_session)
         result = self.__get_param_from_grid(sap_session)
-        if self.do_log:
-            print("Parameter {0} is set to {1}".format(self.param_name, result))
         return result
 
     def __get_param_from_grid(self, sap_session):
         grid_rows_number = SAPLogon.get_grid_rows_number(sap_session, REPORT_GRID)
 
         if grid_rows_number != 1:
-            msg = "An error occurred while executing the script. Details:\n"
-            msg += "Bad parameter name '{0}'. Found {1} parameters".format(self.param_name, grid_rows_number)
+            msg = "Bad parameter name '{0}'. Found {1} parameters".format(self.param_name, grid_rows_number)
             raise ValueError(msg)
 
         return self.__get_param_value_from_grid(sap_session)

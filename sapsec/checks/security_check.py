@@ -1,3 +1,4 @@
+import logging
 
 
 class SecurityCheckStatus:
@@ -20,3 +21,9 @@ class SecurityCheck:
         self.comment = ""
         self.comment_template = ""
         self.problem = None
+
+        self.logger = self.init_logger()
+
+    @staticmethod
+    def init_logger():
+        return logging.getLogger('sapsec')

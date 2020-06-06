@@ -1,14 +1,16 @@
 import yaml
-from sapsecurity.checks.table_check import TableCheck
-from sapsecurity.settings import CONFIG_FILE
-from sapsecurity.sapgui.rsusr002 import Rsusr002Filter, Rsusr002
-from sapsecurity.sapgui.rsusr070 import Rsusr070
+import os
+from sapsec.checks.table_check import TableCheck
+from sapsec.sapgui.rsusr002 import Rsusr002Filter, Rsusr002
+from sapsec.sapgui.rsusr070 import Rsusr070
 
 
 class RsusrCheck(TableCheck):
-    @staticmethod
-    def get_table_filter(filter_name):
-        with open(CONFIG_FILE) as file:
+    def get_table_filter(self, filter_name):
+        if not self.config_file or not os.path.exists(self.config_file):
+            return
+
+        with open(self.config_file) as file:
             yaml_dict = yaml.full_load(file)
 
             if "rsusr_filters" in yaml_dict:
@@ -24,11 +26,10 @@ class RolesByPrivileges(RsusrCheck):
     def execute(self, session):
         try:
             if not hasattr(self, "rsusr070_filter"):
-                msg = "An error occurred while executing the script. Details:\n"
-                msg += "Required parameter 'rsusr070_filter' not set in configuration file."
+                msg = "Required parameter 'rsusr070_filter' not set in configuration file."
                 raise ValueError(msg)
 
-            report_rsusr070 = Rsusr070()
+            report_rsusr070 = Rsusr070(self.config_file)
             if hasattr(self, "save_to_file") and self.save_to_file:
                 report_rsusr070.need_to_save(self.folder_to_save)
             rsusr070_filter = self.get_table_filter(self.rsusr070_filter)
@@ -37,10 +38,13 @@ class RolesByPrivileges(RsusrCheck):
         except (AttributeError, ValueError, TypeError, PermissionError) as error:
             self.problem = type(error)
             self.problem_text = str(error)
-            self.set_problem_status()
             if self.do_log:
-                print(self.problem_text)
+                self.logger.error("Bad configuration for check '{0}'".format(self.title.forma(**self.__dict__)))
+                self.logger.error("{0} - {1}".format(self.problem, self.problem_text))
+            self.set_problem_status()
         else:
+            if self.do_log:
+                self.logger.info("Found {0} roles with the privileges".format(value))
             self.set_status(value)
 
 
@@ -48,11 +52,10 @@ class UsersByPrivileges(RsusrCheck):
     def execute(self, session):
         try:
             if not hasattr(self, "rsusr002_filter"):
-                msg = "An error occurred while executing the script. Details:\n"
-                msg += "Required parameter 'rsusr002_filter' not set in configuration file."
+                msg = "Required parameter 'rsusr002_filter' not set in configuration file."
                 raise ValueError(msg)
 
-            report_rsusr002 = Rsusr002()
+            report_rsusr002 = Rsusr002(self.config_file)
             if hasattr(self, "save_to_file") and self.save_to_file:
                 report_rsusr002.need_to_save(self.folder_to_save)
             rsusr002_filter = self.get_table_filter(self.rsusr002_filter)
@@ -62,7 +65,11 @@ class UsersByPrivileges(RsusrCheck):
             self.problem = type(error)
             self.problem_text = str(error)
             self.set_problem_status()
-            if self.do_log or True:
-                print(self.problem_text)
+            if self.do_log:
+                self.logger.error("Bad configuration for check '{0}'".format(self.title.forma(**self.__dict__)))
+                self.logger.error("{0} - {1}".format(self.problem, self.problem_text))
+            self.set_problem_status()
         else:
+            if self.do_log:
+                self.logger.info("Found {0} users with the privileges".format(value))
             self.set_status(value)
