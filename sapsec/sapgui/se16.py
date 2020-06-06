@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from sapsecurity.sapgui.saplogon import SAPLogon, GUI_CHILD_USERAREA1, GUI_CHILD_WINDOW1, GUI_MAIN_WINDOW
-from sapsecurity.sapgui.transactions import TCode
+from sapsec.sapgui.saplogon import SAPLogon, GUI_CHILD_USERAREA1, GUI_CHILD_WINDOW1, GUI_MAIN_WINDOW
+from sapsec.sapgui.transactions import TCode
 
 SE16_TCODE = 'SE16'
 TABLENAME_FIELD = "wnd[0]/usr/ctxtDATABROWSE-TABLENAME"
@@ -195,8 +195,6 @@ class TCodeSE16(TCode):
         SAPLogon.press_keyboard_keys(session, "Ctrl+F7")
         entries_num = SAPLogon.get_text(session, NUMBER_ENTRIES_FIELD)
         SAPLogon.press_keyboard_keys(session, "Enter", GUI_CHILD_WINDOW1)
-        if self.do_log:
-            print('Number of entries {0}'.format(entries_num))
         return self.__parse_val(entries_num)
 
     @staticmethod
@@ -209,9 +207,8 @@ class TCodeSE16(TCode):
         self.call_transaction(sap_session)
         self.__set_table_name(sap_session)
 
-        if self.first_call:
-            self.first_call = False
-            self.__set_se16_parameters(sap_session)
+        if TCodeSE16.first_call:
+            TCodeSE16.__set_se16_parameters(sap_session)
 
         if table_filter:
             table_filter.enable_columns_to_filter(sap_session)
@@ -226,15 +223,13 @@ class TCodeSE16(TCode):
 
         if gui_msg:
             if gui_msg[1] == "402":
-                msg = "An error occurred while executing the script. Details:\n"
-                msg += "Table '{0}' not found. GUI Message: {1}".format(self.table_name, gui_msg)
+                msg = "Table '{0}' not found. GUI Message: {1}".format(self.table_name, gui_msg)
                 raise ValueError(msg)
 
-    def __set_se16_parameters(self, session):
+    @staticmethod
+    def __set_se16_parameters(session):
         SAPLogon.call_menu(session, MENU_USER_PARAMETERS)
         SAPLogon.select_element(session, FIELD_NAME_SELECTION)
         SAPLogon.select_element(session, ALV_GRID_SELECTION)
         SAPLogon.press_keyboard_keys(session, "Enter", GUI_CHILD_WINDOW1)
-
-        if self.do_log:
-            print('SE16 transaction parameters (user parameters) set')
+        TCodeSE16.first_call = False

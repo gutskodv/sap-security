@@ -1,5 +1,5 @@
-from sapsecurity.sapgui.reports import Report
-from sapsecurity.sapgui.saplogon import SAPLogon
+from sapsec.sapgui.reports import Report
+from sapsec.sapgui.saplogon import SAPLogon
 
 RSUSR002_REPORT = "RSUSR002"
 MAX_AUTH_OBJECTS = 4
@@ -64,8 +64,8 @@ class AuthObject:
 
 
 class Rsusr002(Report):
-    def __init__(self, sap_session=None, do_log=False):
-        super().__init__(RSUSR002_REPORT, sap_session, do_log)
+    def __init__(self, config_file, sap_session=None, do_log=False):
+        super().__init__(RSUSR002_REPORT, config_file, sap_session=sap_session, do_log=do_log)
 
     @staticmethod
     def __set_active_users_only(session):

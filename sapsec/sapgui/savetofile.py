@@ -1,7 +1,6 @@
-import yaml
 import os
 from .saplogon import SAPLogon
-from sapsecurity.settings import CONFIG_FILE
+import sapsec.settings
 
 SUPPORTED_FORMAT = ['txt', 'html']
 DEFAULT_FILE_FORMAT = 'html'
@@ -23,12 +22,8 @@ class SaveToFile:
     @staticmethod
     def __load_configuration():
         if not SaveToFile.file_format:
-            with open(CONFIG_FILE) as file:
-                yaml_dict = yaml.full_load(file)
-
-                if "save_to_file_format" in yaml_dict:
-                    if yaml_dict["save_to_file_format"] in SUPPORTED_FORMAT:
-                        SaveToFile.file_format = yaml_dict["save_to_file_format"]
+            if hasattr(sapsec.settings, "SAVE_TO_FILE_FORMAT"):
+                SaveToFile.file_format = sapsec.settings.SAVE_TO_FILE_FORMAT
 
             if not SaveToFile.file_format:
                 SaveToFile.file_format = DEFAULT_FILE_FORMAT
@@ -45,17 +40,14 @@ class SaveToFile:
             if not os.path.exists(os.path.join(self.report_dir, new_file)):
                 return new_file
 
-    def __del_gif_file(self):
-        path = os.path.split(self.report_dir)[0]
-        folder = os.path.split(self.report_dir)[1]
+    def __del_gif_files(self):
+        folder = os.path.split(self.report_dir)[0]
 
-        gif_extension = "s_b_spce.gif"
-        if os.path.exists(os.path.join(path, folder + gif_extension)):
-            os.remove(os.path.join(path, folder + gif_extension))
-
-        gif_extension = "s_actgro.gif"
-        if os.path.exists(os.path.join(path, folder + gif_extension)):
-            os.remove(os.path.join(path, folder + gif_extension))
+        files_in_directory = os.listdir(folder)
+        filtered_files = [file for file in files_in_directory if file.endswith(".gif")]
+        for file in filtered_files:
+            path_to_file = os.path.join(folder, file)
+            os.remove(path_to_file)
 
     def save_to_file(self, sap_session=None):
         if not sap_session:
@@ -67,4 +59,4 @@ class SaveToFile:
         SAPLogon.set_text(sap_session, PATH_TEXT_FIELD, self.report_dir)
         SAPLogon.set_text(sap_session, FILENAME_TEXT_FIELD, self.__get_filename())
         SAPLogon.press_button(sap_session, REPLACE_BUTTON)
-        self.__del_gif_file()
+        self.__del_gif_files()

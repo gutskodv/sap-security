@@ -1,5 +1,5 @@
-from sapsecurity.sapgui.reports import Report
-from sapsecurity.sapgui.saplogon import SAPLogon
+from sapsec.sapgui.reports import Report
+from sapsec.sapgui.saplogon import SAPLogon
 
 RSUSR070_REPORT = "RSUSR070"
 MAX_AUTH_OBJECTS = 4
@@ -17,8 +17,8 @@ OK_BUTTON = "wnd[1]/tbar[0]/btn[8]"
 
 
 class Rsusr070(Report):
-    def __init__(self, sap_session=None, do_log=False):
-        super().__init__(RSUSR070_REPORT, sap_session, do_log)
+    def __init__(self, config_file, sap_session=None, do_log=False):
+        super().__init__(RSUSR070_REPORT, config_file, sap_session=sap_session, do_log=do_log)
 
     @staticmethod
     def __set_auth_filter(session, rsusr002_filter):
@@ -26,9 +26,7 @@ class Rsusr070(Report):
             if i >= MAX_AUTH_OBJECTS:
                 break
 
-            SAPLogon.try_to_set_text(session,
-                                     AUTH_OBJECT_TEMPLATE.format(type="{type}", num=i + 1),
-                                     auth.name)
+            SAPLogon.try_to_set_text(session, AUTH_OBJECT_TEMPLATE.format(type="{type}", num=i + 1), auth.name)
             SAPLogon.press_keyboard_keys(session, "Enter")
 
             for k in range(0, 10):
@@ -44,19 +42,16 @@ class Rsusr070(Report):
                     for j, value in enumerate(values):
                         if j >= MAX_AUTH_VALUES:
                             break
-                        SAPLogon.try_to_set_text(session,
-                                                 AUTH_VALUES_TEMPLATE.format(type="{type}",
-                                                                             num=i + 1, num1=k, num2=j + 1),
-                                                 value)
+                        SAPLogon.try_to_set_text(
+                            session, AUTH_VALUES_TEMPLATE.format(type="{type}", num=i + 1, num1=k, num2=j + 1), value)
 
     def __execute_and_return_enties_number(self, session):
         SAPLogon.press_keyboard_keys(session, "F8")
         msg = SAPLogon.get_status_message(session)
         if msg and msg[1] == "265":
             return 0
-        else:
-            if hasattr(self, "save_to_file") and self.save_to_file:
-                self.save(session)
+        elif hasattr(self, "save_to_file") and self.save_to_file:
+            self.save(session)
 
         grid_num = SAPLogon.get_grid_rows_number(session, REPORT_GRID)
         return grid_num

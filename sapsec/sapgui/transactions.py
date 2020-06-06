@@ -16,13 +16,11 @@ class TCode:
 
         if gui_msg:
             if gui_msg[1] == "343":
-                msg = "An error occurred while executing the script. Details:\n"
-                msg += "Wrong transaction name '{0}'. GUI Message: {1}".format(self.tcode, gui_msg)
+                msg = "Wrong transaction name '{0}'. GUI Message: {1}".format(self.tcode, gui_msg[2])
                 raise ValueError(msg)
 
             elif gui_msg[1] == "077":
-                msg = "An error occurred while executing the script. Details:\n"
-                msg += "Not authorized to execute '{0}' transaction. GUI Message: {1}".format(self.tcode, gui_msg)
+                msg = "Not authorized to execute '{0}' transaction. GUI Message: {1}".format(self.tcode, gui_msg[2])
                 raise PermissionError(msg)
 
     def exit_transaction(self, sap_session=None):

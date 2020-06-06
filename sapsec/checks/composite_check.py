@@ -1,4 +1,4 @@
-from sapsecurity.checks.security_check import SecurityCheck, SecurityCheckStatus
+from sapsec.checks.security_check import SecurityCheck, SecurityCheckStatus
 
 
 class CompositeCheck(SecurityCheck):
@@ -17,9 +17,14 @@ class CompositeCheck(SecurityCheck):
                                         SecurityCheckStatus.ERROR_WITHOUT_INFLUENCE_TO_STATUS]:
                 self.status = SecurityCheckStatus.NOT_COMPLIED
 
+        if self.do_log:
+            self.logger.info("GL_{1} (composite check) - '{0}')".format(self.title.format(**self.__dict__), self.status))
+
     def execute(self, session):
         for check in self.checks:
+            if self.do_log:
+                self.logger.info("Processing elementary check '{0}'".format(check.title.format(**check.__dict__)))
             check.execute(session)
             if self.do_log:
-                print("Check '%s' finished with status - %s" % (check.title.format(**check.__dict__), check.status))
+                self.logger.info("{1} - '{0}'".format(check.title.format(**check.__dict__), check.status))
         self.calc_global_status()

@@ -1,4 +1,5 @@
-from sapsecurity.checks.security_check import SecurityCheckStatus, SecurityCheck
+import logging
+from sapsec.checks.security_check import SecurityCheckStatus, SecurityCheck
 
 
 class ElementaryCheck(SecurityCheck):
@@ -7,7 +8,11 @@ class ElementaryCheck(SecurityCheck):
 
         self.problem = None
         self.problem_text = ""
-        self.req_text = "not loaded yet"
+        self.req_text = "not loaded yet value"
+        self.config_file = None
+
+    def set_config_file(self, config_file):
+        self.config_file = config_file
 
     def add_additional_parameters(self, **kwargs):
         for key, value in kwargs.items():

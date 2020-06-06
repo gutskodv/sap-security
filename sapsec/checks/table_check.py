@@ -1,4 +1,4 @@
-from sapsecurity.checks.elementary_check import ElementaryCheck
+from sapsec.checks.elementary_check import ElementaryCheck
 
 
 class TableCheck(ElementaryCheck):
@@ -16,14 +16,16 @@ class TableCheck(ElementaryCheck):
                 return self.compare_with_entries_not_empty(result)
 
             else:
-                self.problem = ElementaryCheck.BAD_CONFIG_PARAMS
-                self.problem_text = "Bad configuration"
+                msg = "Bad configuration for check '{0}'".format(self.title.forma(**self.__dict__))
+                raise AttributeError(msg)
 
-        except Exception as ex:
+        except AttributeError as error:
+            self.problem = type(error)
+            self.problem_text = str(error)
             if self.do_log:
-                print(str(ex))
-            self.problem = ElementaryCheck.BAD_CONFIG_PARAMS
-            self.problem_text = "Bad 'param_type'"
+                self.logger.error("Bad configuration for check '{0}'".format(self.title.forma(**self.__dict__)))
+                self.logger.error("{0} - {1}".format(self.problem, self.problem_text))
+            self.set_problem_status()
 
     def compare_with_entries_complied_limit(self, result):
         self.req_text = "less or equal to {0}". format(self.entries_complied_limit)

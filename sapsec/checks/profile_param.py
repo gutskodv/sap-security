@@ -1,5 +1,5 @@
-from sapsecurity.checks.elementary_check import ElementaryCheck
-from sapsecurity.sapgui.rpsfpar import Rspfpar
+from sapsec.checks.elementary_check import ElementaryCheck
+from sapsec.sapgui.rpsfpar import Rspfpar
 
 
 class CheckProfileParameter(ElementaryCheck):
@@ -32,7 +32,7 @@ class CheckProfileParameter(ElementaryCheck):
 
         except Exception as ex:
             if self.do_log:
-                print(str(ex))
+                self.logger.error("Bad configuration for check '{0}'".format(self.title.forma(**self.__dict__)))
             self.problem = ElementaryCheck.BAD_CONFIG_PARAMS
             self.problem_text = "Bad 'param_type'"
 
@@ -78,15 +78,22 @@ class CheckProfileParameter(ElementaryCheck):
     def execute(self, sap_session):
         try:
             if not hasattr(self, "param_name"):
-                msg = "An error occurred while executing the script. Details:\n"
-                msg += "Required parameter 'param_name' not set in configuration file."
+                msg = "Required parameter 'param_name' not set in configuration file."
                 raise ValueError(msg)
 
-            report_rspfpar = Rspfpar(self.param_name, sap_session, do_log=self.do_log)
+            report_rspfpar = Rspfpar(self.param_name, self.config_file, sap_session=sap_session, do_log=self.do_log)
             value = report_rspfpar.get_param_value()
         except (AttributeError, ValueError, TypeError, PermissionError) as error:
             self.problem = type(error)
             self.problem_text = str(error)
+            if self.do_log:
+                if type(error) is not PermissionError:
+                    self.logger.error("Bad configuration for check '{0}'".format(self.title.format(**self.__dict__)))
+                else:
+                    self.logger.error("No authority")
+                self.logger.error("{0} - {1}".format(self.problem, self.problem_text))
             self.set_problem_status()
         else:
+            if self.do_log:
+                self.logger.info("Parameter {0} is set to {1}".format(self.param_name, value))
             self.set_status(value)
