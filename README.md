@@ -32,12 +32,12 @@ If for some reason the installation was not successful (with pip) there is an op
 ```sh
 git clone https://github.com/gutskodv/sap-security.git
 ```
-2. Unpack files from zip archive. And go to project directory with file setup.py.
-3. Collect python package:
+2. Unpack files from dowloaded zip archive. And go to project directory with setup.py file.
+3. Collect sapsec package:
 ```sh
 python setup.py bdist_wheel
 ```
-4. Install python package from generating wheel in dist subdirectory:
+4. Install sapsec package from generaed python wheel in dist subdirectory:
 ```sh
 python setup.py dist\sapsec*.whl
 ```
