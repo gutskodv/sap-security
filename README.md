@@ -7,6 +7,7 @@
 * [Install](#install)
 * [Before running](#before-running)
 * [Usage](#usage)
+* [Predefined SAP security packs](#predefined-sap-security-packs)
 
 ## Python installation
 1. Download [last version of Python 3.x installer](https://www.python.org/downloads/)
@@ -79,3 +80,6 @@ sapsec --rules rules_config.yaml
 ```
 
 5. Inspect generated excel report (in directory you choosen).
+
+## Predefined SAP security packs
+1. Weak(redundant) password hashes (BCODE, PASSCODE) in SAP tables.
