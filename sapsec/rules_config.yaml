@@ -1,0 +1,291 @@
+tcode_to_execute_reports: "se38"
+
+security_checks:
+  - enable: true
+    title: "Weak password hashes (BCODE, PASSCODE) in SAP tables"
+    descr: >
+      SAP passwords are stored in the database in some tables. They are not stored in clear text,
+      but in a hashed format. Hash can be generated via different algorithms. If hacker get access to tables with weak
+      password hashes he will be able to easily get real value of user passwords with brute force password attack.
+    do_log: true
+    child_checks:
+      - enable: true
+        class: "CheckProfileParameter"
+        title: "Parameter {param_name} should be set to {param_complied_value}"
+        descr: >
+          The parameter login/password_downwards_compatibility defines if weak password hashes will be created for new users.
+          See SAP Note 1458262.
+        critical: "High level"
+        do_log: false
+        param_name: "login/password_downwards_compatibility"
+        param_type: 'int'
+        param_complied_value: 0
+
+      - enable: true
+        class: "CheckTableEntries"
+        title: "No weak password hashes in {field_name} field in the {table_name} table"
+        descr: "The {table_name} table  contains hashes of active user passwords. The {field_name} field stores the worst sap password hash."
+        critical: "High level"
+        do_log: false
+        table_name: "USR02"
+        field_name: "BCODE"
+        table_filter: "empty_bcode"
+        entries_complied_limit: 0
+
+      - enable: true
+        class: "CheckTableEntries"
+        title: "No weak hashes in {field_name} field in the {table_name} table"
+        descr: "The {table_name} table contains hashes of active user passwords. The {field_name} field stores weak F sap password hash."
+        critical: "Medium level"
+        do_log: false
+        table_name: "USR02"
+        field_name: "PASSCODE"
+        table_filter: "empty_passcode"
+        entries_complied_limit: 0
+
+      - enable: true
+        class: "CheckTableEntries"
+        title: "No weak hashes in {field_name} field in the {table_name} table"
+        descr: "The {table_name} table contains hashes of old user passwords. The {field_name} field stores the worst sap password hash."
+        critical: "Medium level"
+        do_log: false
+        table_name: "USH02"
+        field_name: "BCODE"
+        table_filter: "empty_bcode"
+        entries_complied_limit: 0
+
+      - enable: true
+        class: "CheckTableEntries"
+        title: "No weak hashes in {field_name} field in the {table_name} table"
+        descr: "The {table_name} table contains hashes of old user passwords. The {field_name} field stores weak F sap password hash."
+        critical: "Low level"
+        do_log: false
+        table_name: "USH02"
+        field_name: "PASSCODE"
+        table_filter: "empty_passcode"
+        entries_complied_limit: 0
+
+      - enable: true
+        class: "CheckTableEntries"
+        title: "No weak hashes in {field_name} field in the {table_name} table"
+        descr: "The {table_name} table contains hashes of old user passwords. The {field_name} field stores the worst sap password hash."
+        critical: "Medium level"
+        do_log: false
+        table_name: "USRPWDHISTORY"
+        field_name: "BCODE"
+        table_filter: "empty_bcode"
+        entries_complied_limit: 0
+
+      - enable: true
+        class: "CheckTableEntries"
+        title: "No weak hashes in {field_name} field in the {table_name} table"
+        descr: "The {table_name}table contains hashes of old user passwords. The {field_name} field stores weak F sap password hash."
+        critical: "Low level"
+        do_log: false
+        table_name: "USRPWDHISTORY"
+        field_name: "PASSCODE"
+        table_filter: "empty_passcode"
+        entries_complied_limit: 0
+
+      - enable: true
+        class: "CheckTableEntries"
+        title: "No weak hashes in {field_name} field in the {table_name} table"
+        descr: "The {table_name} table contains hashes of old user passwords. The {field_name} field stores the worst sap password hash."
+        critical: "Medium level"
+        do_log: false
+        table_name: "USH02_ARC_TMP"
+        field_name: "BCODE"
+        table_filter: "empty_bcode"
+        entries_complied_limit: 0
+
+      - enable: true
+        class: "CheckTableEntries"
+        title: "No weak hashes in {field_name} field in the {table_name} table"
+        descr: "The {table_name} table contains hashes of old user passwords. The {field_name} field stores weak F sap password hash."
+        critical: "Low level"
+        do_log: false
+        table_name: "USH02_ARC_TMP"
+        field_name: "PASSCODE"
+        table_filter: "empty_passcode"
+        entries_complied_limit: 0
+
+      - enable: true
+        class: "CheckTableEntries"
+        title: "The tables containing sap password hashes assigned to SPWD class (authority group)"
+        descr: "The tables USR02, USH02, USRPWDHISTORY, USR02_ARC_TMP, VUSER001, VUSR02_PWD contains password hashes. These critical tables should be add to special SPWD authority group for tables (according to SAP Note 1484692)."
+        critical: "High level"
+        do_log: false
+        table_name: "TDDAT"
+        table_filter: "tddat_for_hash_table"
+        entries_complied_limit: 0
+
+      - enable: true
+        class: "UsersByPrivileges"
+        title: "Limit as possible number of users who can read tables with sap password hashes (1)"
+        descr: "The check inspects SAP system to find users containing S_TABU_DIS authority object to read tables with password hashes."
+        critical: "High level"
+        do_log: false
+        save_to_file: true
+        rsusr002_filter: "read_hashes_s_tabu_dis"
+        entries_complied_limit: 20
+
+      - enable: true
+        class: "UsersByPrivileges"
+        title: "Limit as possible number of users who can read tables with sap password hashes (2)"
+        descr: "The check inspects SAP system to find users containing S_TABU_NAM authority object to read tables USR02, USH02, USRPWDHISTORY, USR02_ARC_TMP"
+        critical: "High level"
+        do_log: false
+        save_to_file: true
+        rsusr002_filter: "read_hashes_s_tabu_nam1"
+        entries_complied_limit: 20
+
+      - enable: true
+        class: "UsersByPrivileges"
+        title: "Limit as possible number of users who can read tables with sap password hashes (3)"
+        descr: "The check inspects SAP system to find users containing S_TABU_NAM authority object to read tables VUSER001, VUSR02_PWD."
+        critical: "High level"
+        do_log: false
+        save_to_file: true
+        rsusr002_filter: "read_hashes_s_tabu_nam2"
+        entries_complied_limit: 20
+
+      - enable: true
+        class: "RolesByPrivileges"
+        title: "Limit as possible number of roles which provide access to read tables with sap password hashes (1)"
+        descr: "The check inspects SAP system to find roles containing S_TABU_DIS authority object to read tables with password hashes."
+        critical: "Medium level"
+        do_log: false
+        save_to_file: true
+        rsusr070_filter: "read_hashes_s_tabu_dis"
+        entries_complied_limit: 5
+
+      - enable: true
+        class: "RolesByPrivileges"
+        title: "Limit as possible number of roles which provide access to read tables with sap password hashes (2)"
+        descr: "The check inspects SAP system to find roles containing S_TABU_NAM authority object to read tables USR02, USH02, USRPWDHISTORY, USR02_ARC_TMP."
+        critical: "Medium level"
+        do_log: false
+        save_to_file: true
+        rsusr070_filter: "read_hashes_s_tabu_nam1"
+        entries_complied_limit: 5
+
+      - enable: true
+        class: "RolesByPrivileges"
+        title: "Limit as possible number of roles which provide access to read tables with sap password hashes (3)"
+        descr: "The check inspects SAP system to find roles containing S_TABU_NAM authority object to read tables VUSER001, VUSR02_PWD."
+        critical: "Medium level"
+        do_log: false
+        save_to_file: true
+        rsusr070_filter: "read_hashes_s_tabu_nam2"
+        entries_complied_limit: 5
+
+      - enable: true
+        class: "CheckProfileParameter"
+        title: "Parameter {param_name} should be set to {req_text}"
+        descr: "The parameter defines the characters of which a password can consist. Value 0 - most restrictive insecure value. Set 1 or 2."
+        critical: "Medium level"
+        do_log: false
+        param_name: "login/password_charset"
+        param_type: 'int'
+        param_complied_values:
+          - 1
+          - 2
+
+table_filters:
+  empty_bcode:
+    - field_name: "BCODE"
+      exclude_values:
+        - "0000000000000000"
+  empty_passcode:
+    - field_name: "PASSCODE"
+      exclude_values:
+        - "0000000000000000000000000000000000000000"
+  tddat_for_hash_table:
+    - field_name: "TABNAME"
+      equal_values:
+        - "USR02"
+        - "USH02"
+        - "USRPWDHISTORY"
+        - "USH02_ARC_TMP"
+        - "VUSER001"
+        - "VUSR02_PWD"
+    - field_name: "CCLASS"
+      exclude_values:
+        - "SPWD"
+
+rsusr_filters:
+  read_hashes_s_tabu_dis:
+    active_users_filter: true
+    user_type_filter:
+      - "A"
+      - "S"
+    role_filter:
+      - "Z*"
+      - "Y*"
+    privilege_filter:
+      - auth_object: "S_TABU_DIS"
+        auth_values:
+          - auth_field: "ACTVT"
+            values:
+              - "03"
+          - auth_field: "DICBERCLS"
+            values:
+              - "SPWD"
+      - auth_object: "S_TCODE"
+        auth_values:
+          - auth_field: "TCD"
+            values:
+              - "SE16*"
+              - "SE11"
+
+  read_hashes_s_tabu_nam1:
+    active_users_filter: true
+    user_type_filter:
+      - "A"
+      - "S"
+    role_filter:
+      - "Z*"
+      - "Y*"
+    privilege_filter:
+      - auth_object: "S_TABU_NAM"
+        auth_values:
+          - auth_field: "ACTVT"
+            values:
+              - "03"
+          - auth_field: "TABLE"
+            values:
+              - "USR02"
+              - "USRPWDHISTORY"
+              - "USH02"
+              - "USR02_ARC_TMP"
+      - auth_object: "S_TCODE"
+        auth_values:
+          - auth_field: "TCD"
+            values:
+              - "SE16*"
+              - "SE11"
+
+  read_hashes_s_tabu_nam2:
+    active_users_filter: true
+    user_type_filter:
+      - "A"
+      - "S"
+    role_filter:
+      - "Z*"
+      - "Y*"
+    privilege_filter:
+      - auth_object: "S_TABU_NAM"
+        auth_values:
+          - auth_field: "ACTVT"
+            values:
+              - "03"
+          - auth_field: "TABLE"
+            values:
+              - "VUSER001"
+              - "VUSR02_PWD"
+      - auth_object: "S_TCODE"
+        auth_values:
+          - auth_field: "TCD"
+            values:
+              - "SE16*"
+              - "SE11"
