@@ -34,7 +34,7 @@ If for some reason the installation was not successful (with pip) there is an op
 git clone https://github.com/gutskodv/sap-security.git
 ```
 2. Unpack files from dowloaded zip archive. And go to project directory with setup.py file.
-3. Ugrade pip, Insatall Wheel package, Collect sapsec package:
+3. Ugrade pip, Install Wheel package, Collect sapsec package:
 ```sh
 python -m pip install --upgrade pip
 pip install wheel
