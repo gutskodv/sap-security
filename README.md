@@ -1,5 +1,7 @@
 # SAP security analysis tool using sap gui scripting
 
+The SAPSEC tool does not need to know and store your login and password to SAP server (log in to SAP yourself). The SAPSEC is open source to ensure that unwanted actions are not performed in the code. Of cource we don't recommend to scan with SAP_ALL user rights.
+
 ## Table of contents
 
 * [ToC](#table-of-contents)
@@ -85,3 +87,13 @@ sapsec --rules rules_config.yaml
 
 ## Predefined SAP security packs
 1. Weak(redundant) password hashes (BCODE, PASSCODE) in SAP tables.
+    Privelege to scan:
+        - S_TABU_NAME:ACTVT=03, TABLE=USR02, USH02, USRPWDHISTORY, USH02_ARC_TMP, VUSER001, VUSR02_PWD, TDDAT
+        - S_PROGRAM:P_ACTION=SUBMIT
+        - S_GUI:ACTVT=61
+        - S_SCR:ACTVT=16
+        - S_TCODE:TCD=SE16, SA38
+        - S_USER_AGR:ACTVT=03, ACT_GROUP=*
+        - S_USER_AUT:ACTVT=03, OBJECT=*, AUTH=*
+        - S_USER_GRP:ACTVT=03, CLASS=*
+        - S_USER_PRO:ACTVT=03 
