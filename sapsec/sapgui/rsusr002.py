@@ -112,6 +112,12 @@ class Rsusr002(Report):
 
     def __execute_and_return_entries_number(self, session):
         SAPLogon.press_keyboard_keys(session, "F8")
+        gui_msg = SAPLogon.get_status_message(session)
+
+        if gui_msg:
+            if gui_msg[1] == "485":
+                msg = "Not authorized to analyze privileges. GUI Message: {0}".format(gui_msg[2])
+                raise PermissionError(msg)
 
         if hasattr(self, "save_to_file") and self.save_to_file:
             self.save(session)

@@ -1,4 +1,4 @@
-tcode_to_execute_reports: "se38"
+tcode_to_execute_reports: "sa38"
 
 security_checks:
   - enable: true
@@ -112,7 +112,7 @@ security_checks:
       - enable: true
         class: "CheckTableEntries"
         title: "The tables containing sap password hashes assigned to SPWD class (authority group)"
-        descr: "The tables USR02, USH02, USRPWDHISTORY, USR02_ARC_TMP, VUSER001, VUSR02_PWD contains password hashes. These critical tables should be add to special SPWD authority group for tables (according to SAP Note 1484692)."
+        descr: "The tables USR02, USH02, USRPWDHISTORY, USRH2_ARC_TMP, VUSER001, VUSR02_PWD contains password hashes. These critical tables should be add to special SPWD authority group for tables (according to SAP Note 1484692)."
         critical: "High level"
         do_log: false
         table_name: "TDDAT"
@@ -132,7 +132,7 @@ security_checks:
       - enable: true
         class: "UsersByPrivileges"
         title: "Limit as possible number of users who can read tables with sap password hashes (2)"
-        descr: "The check inspects SAP system to find users containing S_TABU_NAM authority object to read tables USR02, USH02, USRPWDHISTORY, USR02_ARC_TMP"
+        descr: "The check inspects SAP system to find users containing S_TABU_NAM authority object to read tables USR02, USH02, USRPWDHISTORY, USH02_ARC_TMP"
         critical: "High level"
         do_log: false
         save_to_file: true
@@ -162,7 +162,7 @@ security_checks:
       - enable: true
         class: "RolesByPrivileges"
         title: "Limit as possible number of roles which provide access to read tables with sap password hashes (2)"
-        descr: "The check inspects SAP system to find roles containing S_TABU_NAM authority object to read tables USR02, USH02, USRPWDHISTORY, USR02_ARC_TMP."
+        descr: "The check inspects SAP system to find roles containing S_TABU_NAM authority object to read tables USR02, USH02, USRPWDHISTORY, USH02_ARC_TMP."
         critical: "Medium level"
         do_log: false
         save_to_file: true
@@ -257,7 +257,7 @@ rsusr_filters:
               - "USR02"
               - "USRPWDHISTORY"
               - "USH02"
-              - "USR02_ARC_TMP"
+              - "USH02_ARC_TMP"
       - auth_object: "S_TCODE"
         auth_values:
           - auth_field: "TCD"
