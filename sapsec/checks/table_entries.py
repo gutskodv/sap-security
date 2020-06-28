@@ -17,21 +17,22 @@ class CheckTableEntries(TableCheck):
 
             if "table_filters" not in yaml_dict:
                 if self.do_log:
-                    print("Table filters not found in config file")
+                    self.logger.error("Table filters not found in config file")
 
             if self.table_filter in yaml_dict["table_filters"]:
                 filters = FieldFilters()
                 filters.init_filter_by_dict(yaml_dict["table_filters"][self.table_filter])
                 return filters
 
-    def execute(self, session):
+    def execute(self, sap_sessions, session_num=0):
+        sap_session, sap_info = sap_sessions[session_num]
         try:
             if not hasattr(self, "table_name"):
                 msg = "Required parameter 'table_name' not set in configuration file"
                 raise ValueError(msg)
             se16 = TCodeSE16(self.table_name, do_log=self.do_log)
             table_filter = self.get_table_filter() if hasattr(self, "table_filter") else None
-            result = se16.get_row_number_by_filter(session, table_filter)
+            result = se16.get_row_number_by_filter(sap_session, table_filter)
 
         except (AttributeError, ValueError, TypeError, PermissionError) as error:
             self.problem = type(error)

@@ -1,3 +1,4 @@
 pywin32>=227
 XlsxWriter>=1.2.8
 PyYAML>=5.3.1
+PySapGUI>=1.0.5

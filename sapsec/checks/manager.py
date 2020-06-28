@@ -4,11 +4,12 @@ import os
 import logging
 import sapsec.settings
 from sapsec.checks.composite_check import CompositeCheck
-from sapsec.sapgui.saplogon import SAPLogon
 from sapsec.excelreport.report import SecurityReport
+from pysapgui.sapexistedsession import SAPExistedSession
 from sapsec.checks.users_by_privileges import UsersByPrivileges, RolesByPrivileges
 from sapsec.checks.profile_param import CheckProfileParameter
 from sapsec.checks.table_entries import CheckTableEntries
+from sapsec.checks.software_comparation import CheckSameSoftwareVersion
 
 
 class SAPSecurityAnalysis:
@@ -16,6 +17,7 @@ class SAPSecurityAnalysis:
         self.composite_checks = list()
         self.sap_session = None
         self.session_info = None
+        self.sap_sessions = list()
         self.title = ""
         self.descr = ""
         self.do_log = do_log
@@ -38,7 +40,8 @@ class SAPSecurityAnalysis:
     def __create_subdirs(self):
         local_dir = self.report_folder
 
-        sid = self.session_info["sid"]
+        sap_session, sap_info = self.sap_sessions[0]
+        sid = sap_info["sid"]
         local_dir = os.path.join(local_dir, sid)
         if not os.path.exists(local_dir):
             os.makedirs(local_dir)
@@ -86,19 +89,23 @@ class SAPSecurityAnalysis:
 
     def sap_login(self):
         try:
-            sap_session, session_info = SAPLogon.get_sap_session_with_info()
+            sap_sessions = SAPExistedSession.get_multi_sap_session_with_info()
         except RuntimeError as error:
             if self.do_log:
                 self.logger.error(str(error))
         else:
-            self.sap_session = sap_session
-            self.session_info = session_info
-            self.session_info["date"] = datetime.datetime.now()
+            if not len(sap_sessions):
+                self.logger.error('Active SAP sessions not found')
+                return
+            self.sap_sessions = sap_sessions
+            sap_session, sap_info = sap_sessions[0]
+            sap_info['date'] = datetime.datetime.now()
             if self.do_log:
-                self.logger.info("Successfully connected to {sid}, server {app_server}, user {user} ".format(
-                    sid=self.session_info["sid"],
-                    app_server=self.session_info["app_server"],
-                    user=self.session_info["user"]))
+                for sap_session, sap_info in sap_sessions:
+                    self.logger.info("Successfully connected to {sid}, server {app_server}, user {user} ".format(
+                        sid=sap_info["sid"],
+                        app_server=sap_info["app_server"],
+                        user=sap_info["user"]))
 
     @staticmethod
     def __init_logger():
@@ -117,7 +124,7 @@ class SAPSecurityAnalysis:
             self.logger.info("-------------- SAP Logon Application initialization ---------------")
             self.logger.info("-------------------------------------------------------------------")
         self.sap_login()
-        if self.sap_session:
+        if len(self.sap_sessions):
             self.__add_config_from_settings()
             self.__create_report_folder()
             if self.do_log:
@@ -142,9 +149,8 @@ class SAPSecurityAnalysis:
     def __execute_all(self):
         for check in self.composite_checks:
             if self.do_log:
-                self.logger.info("Processing composite check '{0}'".format(check.title.format(**check.__dict__)))
-            if check.enable:
-                check.execute(self.sap_session)
+                self.logger.info("The composite check '{0}' running".format(check.title.format(**check.__dict__)))
+                check.execute(self.sap_sessions)
 
     @staticmethod
     def open_report(path):
@@ -154,7 +160,7 @@ class SAPSecurityAnalysis:
         report = SecurityReport(self, self.report_folder)
         report_path = report.generate_report()
         if self.do_log:
-            self.logger.info("Report generated: {0}".format(report_path))
+            self.logger.info("The Report generated: {0}".format(report_path))
         if self.open_rep:
             self.open_report(report_path)
 
@@ -169,7 +175,7 @@ class SAPSecurityAnalysis:
         new_composite_check.enable = enable
         self.composite_checks.append(new_composite_check)
         if self.do_log:
-            self.logger.info("Added composite check with title '{0}'".format(
+            self.logger.info("The composite check '{0}' added".format(
                 new_composite_check.title.format(**new_composite_check.__dict__)))
         if "child_checks" in composite_check:
             for elementary_check in composite_check["child_checks"]:
@@ -177,7 +183,7 @@ class SAPSecurityAnalysis:
                 if new_elementary_check:
                     new_composite_check.add_check(new_elementary_check)
                     if self.do_log:
-                        self.logger.info("Added elementary check '{0}'".format(
+                        self.logger.info("The check '{0}' added".format(
                             new_elementary_check.title.format(**new_elementary_check.__dict__)))
 
     def __get_elementary_check(self, elementary_check):

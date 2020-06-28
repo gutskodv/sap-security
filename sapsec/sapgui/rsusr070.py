@@ -1,5 +1,6 @@
 from sapsec.sapgui.reports import Report
-from sapsec.sapgui.saplogon import SAPLogon
+from pysapgui.sapguielements import SAPGuiElements
+from pysapgui.alv_grid import SAPAlvGrid
 
 RSUSR070_REPORT = "RSUSR070"
 MAX_AUTH_OBJECTS = 4
@@ -25,12 +26,12 @@ class Rsusr070(Report):
         for i, auth in enumerate(rsusr002_filter.auth_objects):
             if i >= MAX_AUTH_OBJECTS:
                 break
-            SAPLogon.try_to_set_text(session, AUTH_OBJECT_TEMPLATE.format(type="{type}", num=i + 1), auth.name)
-            SAPLogon.press_keyboard_keys(session, "Enter")
+            SAPGuiElements.try_to_set_text(session, AUTH_OBJECT_TEMPLATE.format(type="{type}", num=i + 1), auth.name)
+            SAPGuiElements.press_keyboard_keys(session, "Enter")
 
             for k in range(0, 10):
                 try:
-                    text = SAPLogon.get_text(session, FIELD_NAME_TEMPLATE.format(num=i + 1, num1=k))
+                    text = SAPGuiElements.get_text(session, FIELD_NAME_TEMPLATE.format(num=i + 1, num1=k))
                 except AttributeError:
                     break
                 else:
@@ -41,28 +42,34 @@ class Rsusr070(Report):
                     for j, value in enumerate(values):
                         if j >= MAX_AUTH_VALUES:
                             break
-                        SAPLogon.try_to_set_text(
+                        SAPGuiElements.try_to_set_text(
                             session, AUTH_VALUES_TEMPLATE.format(type="{type}", num=i + 1, num1=k, num2=j + 1), value)
 
     def __execute_and_return_enties_number(self, session):
-        SAPLogon.press_keyboard_keys(session, "F8")
-        msg = SAPLogon.get_status_message(session)
-        if msg and msg[1] == "265":
+        SAPGuiElements.press_keyboard_keys(session, "F8")
+        gui_msg = SAPGuiElements.get_status_message(session)
+
+        if gui_msg and gui_msg[1] == "485":
+            msg = "Not authorized to analyze privileges. GUI Message: {0}".format(gui_msg[2])
+            raise PermissionError(msg)
+        if gui_msg and gui_msg[1] == "265":
             return 0
         elif hasattr(self, "save_to_file") and self.save_to_file:
-            self.save(session)
+            filename = self.save(session)
+            self.comment = '=HYPERLINK("{0}", "more details")'.format(filename)
 
-        grid_num = SAPLogon.get_grid_rows_number(session, REPORT_GRID)
+        grid = SAPAlvGrid(session, REPORT_GRID)
+        grid_num = grid.get_row_count()
         return grid_num
 
     @staticmethod
     def __set_roles_filter(session, roles_filter):
-        SAPLogon.press_button(session, ROLES_FILTER_BUTTON)
+        SAPGuiElements.press_button(session, ROLES_FILTER_BUTTON)
         for i, item in enumerate(roles_filter):
-            SAPLogon.try_to_set_text(session,
+            SAPGuiElements.try_to_set_text(session,
                                      EQUAL_FILTER_TEMPLATE.format(type="{type}", num=i),
                                      item)
-        SAPLogon.press_button(session, OK_BUTTON)
+        SAPGuiElements.press_button(session, OK_BUTTON)
 
     def get_row_number_by_filter(self, sap_session, rsusr070_filter):
         if not sap_session:

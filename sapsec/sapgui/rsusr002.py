@@ -1,5 +1,6 @@
 from sapsec.sapgui.reports import Report
-from sapsec.sapgui.saplogon import SAPLogon
+from pysapgui.sapguielements import SAPGuiElements
+from pysapgui.alv_grid import SAPAlvGrid
 
 RSUSR002_REPORT = "RSUSR002"
 MAX_AUTH_OBJECTS = 4
@@ -69,31 +70,31 @@ class Rsusr002(Report):
 
     @staticmethod
     def __set_active_users_only(session):
-        SAPLogon.select_element(session, ACTIVE_USERS_ONLY)
+        SAPGuiElements.select_element(session, ACTIVE_USERS_ONLY)
 
     @staticmethod
     def __set_filter_by_user_type(session, user_types):
-        SAPLogon.press_button(session, USER_TYPE_FILTER_BUTTON)
+        SAPGuiElements.press_button(session, USER_TYPE_FILTER_BUTTON)
         for i, user_type in enumerate(user_types):
-            SAPLogon.try_to_set_text(session,
+            SAPGuiElements.try_to_set_text(session,
                                      INCLUDE_VALUES_TEMPLATE.format(type="{type}", row=i),
                                      user_type)
-        SAPLogon.press_button(session, OK_BUTTON)
+        SAPGuiElements.press_button(session, OK_BUTTON)
 
     @staticmethod
     def __set_auth_filter(session, rsusr002_filter):
-        SAPLogon.select_element(session, PRIVILEGE_TAB)
+        SAPGuiElements.select_element(session, PRIVILEGE_TAB)
 
         for i, auth in enumerate(rsusr002_filter.auth_objects):
             if i >= MAX_AUTH_OBJECTS:
                 break
 
-            SAPLogon.try_to_set_text(session, AUTH_OBJECT_TEMPLATE.format(type="{type}", num=i + 1), auth.name)
-            SAPLogon.press_keyboard_keys(session, "Enter")
+            SAPGuiElements.try_to_set_text(session, AUTH_OBJECT_TEMPLATE.format(type="{type}", num=i + 1), auth.name)
+            SAPGuiElements.press_keyboard_keys(session, "Enter")
 
             for k in range(0, 10):
                 try:
-                    text = SAPLogon.get_text(session, FIELD_NAME_TEMPLATE.format(num=i + 1, num1=k))
+                    text = SAPGuiElements.get_text(session, FIELD_NAME_TEMPLATE.format(num=i + 1, num1=k))
                 except AttributeError:
                     break
                 else:
@@ -105,24 +106,26 @@ class Rsusr002(Report):
                     for j, value in enumerate(values):
                         if j >= MAX_AUTH_VALUES:
                             break
-                        SAPLogon.try_to_set_text(session,
+                        SAPGuiElements.try_to_set_text(session,
                                                  AUTH_VALUES_TEMPLATE.format(type="{type}",
                                                                              num=i + 1, num1=k, num2=j + 1),
                                                  value)
 
     def __execute_and_return_entries_number(self, session):
-        SAPLogon.press_keyboard_keys(session, "F8")
-        gui_msg = SAPLogon.get_status_message(session)
+        SAPGuiElements.press_keyboard_keys(session, "F8")
+        gui_msg = SAPGuiElements.get_status_message(session)
 
-        if gui_msg:
-            if gui_msg[1] == "485":
-                msg = "Not authorized to analyze privileges. GUI Message: {0}".format(gui_msg[2])
-                raise PermissionError(msg)
+        if gui_msg and gui_msg[1] == "485":
+            msg = "Not authorized to analyze privileges. GUI Message: {0}".format(gui_msg[2])
+            raise PermissionError(msg)
+        elif gui_msg and gui_msg[1] == "265":
+            return 0
+        elif hasattr(self, "save_to_file") and self.save_to_file:
+            filename = self.save(session)
+            self.comment = '=HYPERLINK("{0}", "more details")'.format(filename)
 
-        if hasattr(self, "save_to_file") and self.save_to_file:
-            self.save(session)
-
-        grid_num = SAPLogon.get_grid_rows_number(session, REPORT_GRID)
+        grid = SAPAlvGrid(session, REPORT_GRID)
+        grid_num = grid.get_row_count()
         return grid_num
 
     def get_row_number_by_filter(self, sap_session, rsusr002_filter):
@@ -130,7 +133,7 @@ class Rsusr002(Report):
             sap_session = self.sap_session
         self.start_report(sap_session)
 
-        SAPLogon.select_element(sap_session, LOGON_TAB)
+        SAPGuiElements.select_element(sap_session, LOGON_TAB)
         if rsusr002_filter.active_users:
             self.__set_active_users_only(sap_session)
 

@@ -2,7 +2,7 @@ tcode_to_execute_reports: "sa38"
 
 security_checks:
   - enable: true
-    title: "Weak password hashes (BCODE, PASSCODE) in SAP tables"
+    title: "The SAP Password hashes"
     descr: >
       SAP passwords are stored in the database in some tables. They are not stored in clear text,
       but in a hashed format. Hash can be generated via different algorithms. If hacker get access to tables with weak
@@ -190,6 +190,18 @@ security_checks:
         param_complied_values:
           - 1
           - 2
+
+  - enable: true
+    title: "The SAP configuration differences"
+    descr: "The composite check analyzes configuration of two or more SAP systems to find configuration differences."
+    do_log: true
+    child_checks:
+      - enable: true
+        class: "CheckSameSoftwareVersion"
+        title: "SAP software component versions differences"
+        descr: "Multi systems check. The check find differences in versions of installed SAP software components. This check is primarily intended to run on SAP systems included in a single transport domain. Usually any configuration differences are not acceptable."
+        critical: "Medium level"
+        do_log: false
 
 table_filters:
   empty_bcode:

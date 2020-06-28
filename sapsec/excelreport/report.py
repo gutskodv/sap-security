@@ -14,33 +14,37 @@ class SecurityReport:
 
     def __get_report_title(self):
         if hasattr(sapsec.settings, "MAIN_REPORT_TITLE"):
-            return sapsec.settings.MAIN_REPORT_TITLE.format(**self.main_process.session_info)
+            session, session_info = self.main_process.sap_sessions[0]
+            return sapsec.settings.MAIN_REPORT_TITLE.format(**session_info)
         return DEFAULT_TITLE
 
     def __get_report_name(self):
         if hasattr(sapsec.settings, "REPORT_FILE_NAME"):
-            return sapsec.settings.REPORT_FILE_NAME.format(**self.main_process.session_info)
+            session, session_info = self.main_process.sap_sessions[0]
+            return sapsec.settings.REPORT_FILE_NAME.format(**session_info)
         return DEFAULT_REPORT_NAME
 
     def __get_scan_descr(self):
         descr = list()
-        if "date" in self.main_process.session_info.keys():
+        session, session_info = self.main_process.sap_sessions[0]
+        if "date" in session_info.keys():
             descr.append("Scan Date: {datescan}".format(
-                datescan=self.main_process.session_info["date"].strftime("%d-%b-%Y (%H:%M)")))
-        if "user" in self.main_process.session_info.keys():
-            descr.append("SAP User: {user}".format(user=self.main_process.session_info["user"]))
+                datescan=session_info["date"].strftime("%d-%b-%Y (%H:%M)")))
+        if "user" in session_info.keys():
+            descr.append("SAP User: {user}".format(user=session_info["user"]))
         return ", ".join(descr)
 
     def __get_system_descr(self):
         descr = list()
-        if hasattr(self.main_process, 'session_info'):
-            if "sid" in self.main_process.session_info.keys():
-                descr.append("SAP system: {sid}".format(sid=self.main_process.session_info["sid"]))
-            if "client" in self.main_process.session_info.keys():
-                descr.append("Client: {client}".format(client=self.main_process.session_info["client"]))
-            if "app_server" in self.main_process.session_info.keys():
+        session, session_info = self.main_process.sap_sessions[0]
+        if True:
+            if "sid" in session_info.keys():
+                descr.append("SAP system: {sid}".format(sid=session_info["sid"]))
+            if "client" in session_info.keys():
+                descr.append("Client: {client}".format(client=session_info["client"]))
+            if "app_server" in session_info.keys():
                 descr.append("Application server: {app_server}".format(
-                    app_server=self.main_process.session_info["app_server"]))
+                    app_server=session_info["app_server"]))
         return ", ".join(descr)
 
     def generate_report(self):

@@ -23,7 +23,8 @@ class RsusrCheck(TableCheck):
 
 
 class RolesByPrivileges(RsusrCheck):
-    def execute(self, session):
+    def execute(self, sap_sessions, session_num=0):
+        sap_session, sap_info = sap_sessions[session_num]
         try:
             if not hasattr(self, "rsusr070_filter"):
                 msg = "Required parameter 'rsusr070_filter' not set in configuration file."
@@ -33,7 +34,7 @@ class RolesByPrivileges(RsusrCheck):
             if hasattr(self, "save_to_file") and self.save_to_file:
                 report_rsusr070.need_to_save(self.folder_to_save)
             rsusr070_filter = self.get_table_filter(self.rsusr070_filter)
-            value = report_rsusr070.get_row_number_by_filter(session, rsusr070_filter)
+            value = report_rsusr070.get_row_number_by_filter(sap_session, rsusr070_filter)
 
         except (AttributeError, ValueError, TypeError, PermissionError) as error:
             self.problem = type(error)
@@ -45,11 +46,14 @@ class RolesByPrivileges(RsusrCheck):
         else:
             if self.do_log:
                 self.logger.info("Found {0} roles with the privileges".format(value))
+            if hasattr(report_rsusr070, 'comment') and report_rsusr070.comment:
+                self.comment = report_rsusr070.comment
             self.set_status(value)
 
 
 class UsersByPrivileges(RsusrCheck):
-    def execute(self, session):
+    def execute(self, sap_sessions, session_num=0):
+        sap_session, sap_info = sap_sessions[session_num]
         try:
             if not hasattr(self, "rsusr002_filter"):
                 msg = "Required parameter 'rsusr002_filter' not set in configuration file."
@@ -59,7 +63,7 @@ class UsersByPrivileges(RsusrCheck):
             if hasattr(self, "save_to_file") and self.save_to_file:
                 report_rsusr002.need_to_save(self.folder_to_save)
             rsusr002_filter = self.get_table_filter(self.rsusr002_filter)
-            value = report_rsusr002.get_row_number_by_filter(session, rsusr002_filter)
+            value = report_rsusr002.get_row_number_by_filter(sap_session, rsusr002_filter)
 
         except (AttributeError, ValueError, TypeError, PermissionError) as error:
             self.problem = type(error)
@@ -72,4 +76,6 @@ class UsersByPrivileges(RsusrCheck):
         else:
             if self.do_log:
                 self.logger.info("Found {0} users with the privileges".format(value))
+            if hasattr(report_rsusr002, 'comment') and report_rsusr002.comment:
+                self.comment = report_rsusr002.comment
             self.set_status(value)

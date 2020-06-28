@@ -18,13 +18,13 @@ class CompositeCheck(SecurityCheck):
                 self.status = SecurityCheckStatus.NOT_COMPLIED
 
         if self.do_log:
-            self.logger.info("GL_{1} (composite check) - '{0}')".format(self.title.format(**self.__dict__), self.status))
+            self.logger.info("The composite check finished with status 'GL_{0}'".format(self.status))
 
-    def execute(self, session):
+    def execute(self, sessions):
         for check in self.checks:
             if self.do_log:
-                self.logger.info("Processing elementary check '{0}'".format(check.title.format(**check.__dict__)))
-            check.execute(session)
+                self.logger.info("The check '{0}' running".format(check.title.format(**check.__dict__)))
+            check.execute(sessions)
             if self.do_log:
-                self.logger.info("{1} - '{0}'".format(check.title.format(**check.__dict__), check.status))
+                self.logger.info("Finished with status '{0}'".format(check.status))
         self.calc_global_status()

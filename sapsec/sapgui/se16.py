@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
-from sapsec.sapgui.saplogon import SAPLogon, GUI_CHILD_USERAREA1, GUI_CHILD_WINDOW1, GUI_MAIN_WINDOW
-from sapsec.sapgui.transactions import TCode
+from pysapgui.sapguielements import SAPGuiElements
+from pysapgui.transaction import SAPTransaction
+from pysapgui.sapgui import GUI_CHILD_WINDOW1, GUI_MAIN_WINDOW, GUI_CHILD_USER_AREA1
+import pysapgui
+
 
 SE16_TCODE = 'SE16'
 TABLENAME_FIELD = "wnd[0]/usr/ctxtDATABROWSE-TABLENAME"
@@ -61,21 +64,21 @@ class FieldFilters:
         if not len(column_list):
             return
 
-        SAPLogon.call_menu(session, MENU_FIELDS_FOR_SELECTION)
-        max_scroll = int(SAPLogon.get_max_scroll_position(session, GUI_CHILD_USERAREA1))
+        SAPGuiElements.call_menu(session, MENU_FIELDS_FOR_SELECTION)
+        max_scroll = int(SAPGuiElements.get_max_scroll_position(session, GUI_CHILD_USER_AREA1))
         pos_scroll = 0
         startpos = 5
         do_cycle = True
         while do_cycle:
-            SAPLogon.set_scroll_position(session, pos_scroll, GUI_CHILD_USERAREA1)
+            SAPGuiElements.set_scroll_position(session, pos_scroll, GUI_CHILD_USER_AREA1)
             max_i = 0
-            for i, element in SAPLogon.iter_elements_by_template(session,
-                                                                 GUI_CHILD_USERAREA1,
+            for i, element in SAPGuiElements.iter_elements_by_template(session,
+                                                                 GUI_CHILD_USER_AREA1,
                                                                  "wnd[1]/usr/lbl[4,{0}]",
                                                                  startpos):
                 max_i = i
                 if element.text in column_list:
-                    SAPLogon.set_checkbox(session, "wnd[1]/usr/chk[2,{0}]".format(i))
+                    SAPGuiElements.set_checkbox(session, "wnd[1]/usr/chk[2,{0}]".format(i))
             if pos_scroll < max_scroll:
                 new_pos_scroll = min(pos_scroll + max_i, max_scroll)
                 startpos = max_i - (new_pos_scroll - pos_scroll) + 1
@@ -83,7 +86,7 @@ class FieldFilters:
             else:
                 do_cycle = False
 
-        SAPLogon.press_keyboard_keys(session, "Enter", GUI_CHILD_WINDOW1)
+        SAPGuiElements.press_keyboard_keys(session, "Enter", GUI_CHILD_WINDOW1)
 
     def get_filter_by_field_name(self, field_name):
         for field_filter in self.filters:
@@ -97,7 +100,7 @@ class FieldFilters:
         columnlist = [filter1.field_name for filter1 in self.filters]
 
         startpos = 1
-        for i, element in SAPLogon.iter_elements_by_template(session,
+        for i, element in SAPGuiElements.iter_elements_by_template(session,
                                                              GUI_MAIN_WINDOW,
                                                              "wnd[0]/usr/txt%_I{0}_%_APP_%-TEXT",
                                                              startpos):
@@ -105,7 +108,7 @@ class FieldFilters:
             if element_text in columnlist:
                 element_id = element.id
                 button_id = element_id.replace("txt", "btn").replace("-TEXT", "-VALU_PUSH")
-                SAPLogon.press_button(session, button_id)
+                SAPGuiElements.press_button(session, button_id)
                 field_filter = self.get_filter_by_field_name(element_text)
                 field_filter.set_filter(session)
 
@@ -159,42 +162,45 @@ class FieldFilter:
             self.exclude_range_values.append(values)
 
     def set_filter(self, session):
-        SAPLogon.press_keyboard_keys(session, "Shift+F4")
+        SAPGuiElements.press_keyboard_keys(session, "Shift+F4")
         if hasattr(self, "exclude_single_values"):
             if len(self.exclude_single_values):
-                SAPLogon.select_element(session, EXCLUDE_VALUES)
+                SAPGuiElements.select_element(session, EXCLUDE_VALUES)
                 for i, item in enumerate(self.exclude_single_values):
                     if item == "":
-                        SAPLogon.press_button(session, EXCLUDE_VALUES_BUTTON.format(i))
-                        SAPLogon.press_button(session, OK_BUTTON_FILTER)
+                        SAPGuiElements.press_button(session, EXCLUDE_VALUES_BUTTON.format(i))
+                        SAPGuiElements.press_button(session, OK_BUTTON_FILTER)
                     else:
-                        SAPLogon.try_to_set_text(session, EXCLUDE_VALUES_TEMPLATE.format(type="{type}", row=i), item)
+                        SAPGuiElements.try_to_set_text(session, EXCLUDE_VALUES_TEMPLATE.format(type="{type}", row=i), item)
 
         if hasattr(self, "equal_single_values"):
             if len(self.equal_single_values):
-                SAPLogon.select_element(session, INCLUDE_VALUES)
+                SAPGuiElements.select_element(session, INCLUDE_VALUES)
                 for i, item in enumerate(self.equal_single_values):
                     if item == "":
-                        SAPLogon.press_button(session, INCLUDE_VALUES_BUTTON.format(i))
-                        SAPLogon.press_button(session, OK_BUTTON_FILTER)
+                        SAPGuiElements.press_button(session, INCLUDE_VALUES_BUTTON.format(i))
+                        SAPGuiElements.press_button(session, OK_BUTTON_FILTER)
                     else:
-                        SAPLogon.try_to_set_text(session, INCLUDE_VALUES_TEMPLATE.format(type="{type}", row=i), item)
+                        SAPGuiElements.try_to_set_text(session, INCLUDE_VALUES_TEMPLATE.format(type="{type}", row=i), item)
 
-        SAPLogon.press_keyboard_keys(session, "F8")
+        SAPGuiElements.press_keyboard_keys(session, "F8")
 
 
-class TCodeSE16(TCode):
+class TCodeSE16:
     first_call = True
 
     def __init__(self, table_name, sap_session=None, do_log=False):
-        super().__init__(SE16_TCODE, sap_session, do_log)
+        self.tcode = SE16_TCODE
+        self.table_name = table_name
+        self.sap_session = sap_session
+        self.do_log = do_log
         self.table_name = table_name
         self.problem = None
 
     def __get_entries_number(self, session):
-        SAPLogon.press_keyboard_keys(session, "Ctrl+F7")
-        entries_num = SAPLogon.get_text(session, NUMBER_ENTRIES_FIELD)
-        SAPLogon.press_keyboard_keys(session, "Enter", GUI_CHILD_WINDOW1)
+        SAPGuiElements.press_keyboard_keys(session, "Ctrl+F7")
+        entries_num = SAPGuiElements.get_text(session, NUMBER_ENTRIES_FIELD)
+        SAPGuiElements.press_keyboard_keys(session, "Enter", GUI_CHILD_WINDOW1)
         return self.__parse_val(entries_num)
 
     @staticmethod
@@ -204,7 +210,7 @@ class TCodeSE16(TCode):
     def get_row_number_by_filter(self, sap_session, table_filter=None):
         if not sap_session:
             sap_session = self.sap_session
-        self.call_transaction(sap_session)
+        SAPTransaction.call(sap_session, self.tcode)
         self.__set_table_name(sap_session)
 
         if TCodeSE16.first_call:
@@ -216,9 +222,9 @@ class TCodeSE16(TCode):
         return self.__get_entries_number(sap_session)
 
     def __set_table_name(self, session):
-        SAPLogon.set_text(session, TABLENAME_FIELD, self.table_name)
-        SAPLogon.press_keyboard_keys(session, "Enter")
-        gui_msg = SAPLogon.get_status_message(session)
+        SAPGuiElements.set_text(session, TABLENAME_FIELD, self.table_name)
+        SAPGuiElements.press_keyboard_keys(session, "Enter")
+        gui_msg = SAPGuiElements.get_status_message(session)
 
         if gui_msg:
             if gui_msg[1] == "402":
@@ -230,8 +236,8 @@ class TCodeSE16(TCode):
 
     @staticmethod
     def __set_se16_parameters(session):
-        SAPLogon.call_menu(session, MENU_USER_PARAMETERS)
-        SAPLogon.select_element(session, FIELD_NAME_SELECTION)
-        SAPLogon.select_element(session, ALV_GRID_SELECTION)
-        SAPLogon.press_keyboard_keys(session, "Enter", GUI_CHILD_WINDOW1)
+        SAPGuiElements.call_menu(session, MENU_USER_PARAMETERS)
+        SAPGuiElements.select_element(session, FIELD_NAME_SELECTION)
+        SAPGuiElements.select_element(session, ALV_GRID_SELECTION)
+        SAPGuiElements.press_keyboard_keys(session, "Enter", GUI_CHILD_WINDOW1)
         TCodeSE16.first_call = False

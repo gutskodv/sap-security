@@ -1,5 +1,6 @@
 from .reports import Report
-from .saplogon import SAPLogon
+from pysapgui.sapguielements import SAPGuiElements
+from pysapgui.alv_grid import SAPAlvGrid
 
 RSPFPAR_REPORT = 'RSPFPAR'
 PARAM_NAME_FIELD = 'wnd[0]/usr/txtPNAME-LOW'
@@ -12,8 +13,8 @@ class Rspfpar(Report):
         super().__init__(RSPFPAR_REPORT, config_file, sap_session, do_log)
 
     def __set_param_name_and_execute(self, sap_session):
-        SAPLogon.set_text(sap_session, PARAM_NAME_FIELD, self.param_name)
-        SAPLogon.press_keyboard_keys(sap_session, "F8")
+        SAPGuiElements.set_text(sap_session, PARAM_NAME_FIELD, self.param_name)
+        SAPGuiElements.press_keyboard_keys(sap_session, "F8")
 
     def get_param_value(self, sap_session=None):
         if not sap_session:
@@ -25,7 +26,8 @@ class Rspfpar(Report):
         return result
 
     def __get_param_from_grid(self, sap_session):
-        grid_rows_number = SAPLogon.get_grid_rows_number(sap_session, REPORT_GRID)
+        grid = SAPAlvGrid(sap_session, REPORT_GRID)
+        grid_rows_number = grid.get_row_count()
 
         if grid_rows_number != 1:
             msg = "Bad parameter name '{0}'. Found {1} parameters".format(self.param_name, grid_rows_number)
@@ -36,9 +38,10 @@ class Rspfpar(Report):
     @staticmethod
     def __get_param_value_from_grid(sap_session):
         row_number = 0
+        grid = SAPAlvGrid(sap_session, REPORT_GRID)
 
         for column_number in range(1, 4):
-            value = SAPLogon.get_value_from_grid(sap_session, REPORT_GRID, row_number, column_number)
+            value = grid.get_cell(row_number, column_number)
             if value:
                 return value.strip()
 

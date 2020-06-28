@@ -1,7 +1,7 @@
 import yaml
 import os
-from .transactions import TCode
-from .saplogon import SAPLogon
+from pysapgui.transaction import SAPTransaction
+from pysapgui.sapguielements import SAPGuiElements
 from .savetofile import SaveToFile
 
 SA38_TCODE = 'SA38'
@@ -48,9 +48,9 @@ class Report:
             Report.tcode_to_start_report = DEFAULT_TCODE
 
     def __set_report_and_execute(self, sap_session):
-        SAPLogon.set_text(sap_session, PROGRAM_FIELD, self.report_name)
-        SAPLogon.press_keyboard_keys(sap_session, "F8")
-        gui_msg = SAPLogon.get_status_message(sap_session)
+        SAPGuiElements.set_text(sap_session, PROGRAM_FIELD, self.report_name)
+        SAPGuiElements.press_keyboard_keys(sap_session, "F8")
+        gui_msg = SAPGuiElements.get_status_message(sap_session)
 
         if gui_msg:
             if gui_msg[1] == "017":
@@ -65,8 +65,7 @@ class Report:
         if not sap_session:
             sap_session = self.sap_session
 
-        transaction = TCode(Report.tcode_to_start_report, sap_session)
-        transaction.call_transaction()
+        SAPTransaction.call(sap_session, Report.tcode_to_start_report)
 
         self.__set_report_and_execute(sap_session)
 
@@ -78,4 +77,4 @@ class Report:
         if not sap_session:
             sap_session = self.sap_session
         dialog = SaveToFile(self.folder_to_save, sap_session)
-        dialog.save_to_file()
+        return dialog.save_to_file()

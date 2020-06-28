@@ -77,7 +77,8 @@ class CheckProfileParameter(ElementaryCheck):
                 return True
             return False
 
-    def execute(self, sap_session):
+    def execute(self, sap_sessions, session_num=0):
+        sap_session, sap_info = sap_sessions[session_num]
         try:
             if not hasattr(self, "param_name"):
                 msg = "Required parameter 'param_name' not set in configuration file."

@@ -152,6 +152,19 @@ class XlsxReport:
 
         self.inc_current_row()
 
+    def insert_software_columns(self, columns):
+        for i in range(0, len(columns)):
+            if i == 0:
+                style = "column_first"
+            elif i == len(columns) - 1:
+                style = "column_last"
+            else:
+                style = "column_middle_center"
+
+            self.worksheet.write(self.current_row, self.start_column + i, columns[i][0], self.__get_style(style))
+            self.worksheet.set_column(self.start_column + i, self.start_column + i, columns[i][1])
+        self.inc_current_row()
+
     def insert_composite_header(self, title, descr, status):
         self.worksheet.set_row(self.current_row, 3)
         self.worksheet.merge_range(self.current_row, self.start_column, self.current_row, self.start_column + 5,
@@ -213,8 +226,29 @@ class XlsxReport:
         )
         self.inc_current_row()
 
+    def insert_software_data(self, component, sids):
+        if component.same_version:
+            color = "_green"
+            same_version = "COMPLIED"
+        else:
+            color = "_red"
+            same_version = "NOT_COMPLIED"
+
+        self.worksheet.write(self.current_row, self.start_column, component.component,
+                             self.__get_style("elementary_title" + color))
+        for i, sid in enumerate(sids):
+            value = component.comp_ver[sid] + ", SP " + component.sp_ver[sid] if sid in component.comp_ver.keys() else ""
+            self.worksheet.write(self.current_row, self.start_column + 1 + i, value, self.__get_style("elementary_critical" + color))
+        self.worksheet.write(self.current_row, self.start_column + len(sids) + 1, same_version,
+                             self.__get_style("elementary_status" + color))
+        self.worksheet.write(self.current_row, self.start_column + len(sids) + 2, "", self.__get_style("elementary_comment" + color))
+        self.inc_current_row()
+
     def add_filters(self, startpos):
         column_min = 4
         column_max = 5
 
         self.worksheet.autofilter(startpos - 1, column_min, self.current_row - 1, column_max)
+
+    def add_soft_ver_filters(self, startpos, status_column):
+        self.worksheet.autofilter(startpos - 1, status_column, self.current_row - 1, status_column)

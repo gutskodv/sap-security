@@ -37,5 +37,16 @@ class ElementaryCheck(SecurityCheck):
             self.status = SecurityCheckStatus.NOT_COMPLIED
             self.comment = self.comment_template.format(result=result, req=self.req_text)
 
+    def process_error(self, error):
+        self.problem = type(error)
+        self.problem_text = str(error)
+        if self.do_log:
+            if type(error) is not PermissionError:
+                self.logger.error("Bad configuration for check '{0}'".format(self.title.format(**self.__dict__)))
+            else:
+                self.logger.error("No authority")
+            self.logger.error("{0} - {1}".format(self.problem, self.problem_text))
+        self.set_problem_status()
+
     def compare_result(self, result):
         return True

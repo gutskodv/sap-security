@@ -1,5 +1,5 @@
 import os
-from .saplogon import SAPLogon
+from pysapgui.sapguielements import SAPGuiElements
 import sapsec.settings
 
 SUPPORTED_FORMAT = ['txt', 'html']
@@ -52,11 +52,13 @@ class SaveToFile:
     def save_to_file(self, sap_session=None):
         if not sap_session:
             sap_session = self.sap_session
-        SAPLogon.press_keyboard_keys(sap_session, "Ctrl+Shift+F9")
+        SAPGuiElements.press_keyboard_keys(sap_session, "Ctrl+Shift+F9")
         if self.file_format == 'html':
-            SAPLogon.select_element(sap_session, HTML_FORMAT)
-        SAPLogon.press_button(sap_session, CONFIRM_FORMAT_BUTTON)
-        SAPLogon.set_text(sap_session, PATH_TEXT_FIELD, self.report_dir)
-        SAPLogon.set_text(sap_session, FILENAME_TEXT_FIELD, self.__get_filename())
-        SAPLogon.press_button(sap_session, REPLACE_BUTTON)
+            SAPGuiElements.select_element(sap_session, HTML_FORMAT)
+        filename = self.__get_filename()
+        SAPGuiElements.press_button(sap_session, CONFIRM_FORMAT_BUTTON)
+        SAPGuiElements.set_text(sap_session, PATH_TEXT_FIELD, self.report_dir)
+        SAPGuiElements.set_text(sap_session, FILENAME_TEXT_FIELD, filename)
+        SAPGuiElements.press_button(sap_session, REPLACE_BUTTON)
         self.__del_gif_files()
+        return filename
